@@ -29,35 +29,35 @@ int main( int argc, char* argv[] ) {
   }
 
   std::string runName = "";
+  std::string chosen3x3 = "xtal11";
+
   if( argc>1 ) {
     std::string runName_str(argv[1]);
     runName = runName_str;
+    if(argc>2){
+      std::string matrix(argv[2]);
+      chosen3x3=matrix;
+    }
+  } else {
+
+    std::cout << "Usage:" << std::endl;
+    std::cout << "./intercalibrateChannels [runName] ((xtal11),(xtal_4fibres)) " << std::endl;
+    exit(12345);
+
   }
+
 
   
   TFile*  file=TFile::Open("../H4Analysis_2016/ntuples/analysis_"+TString(runName)+".root");
   TTree* tree= (TTree*)file->Get("h4");
-  int nentries = tree->GetEntries();
-  nentries=10;
   H4AnalysisTree* inputTree= new H4AnalysisTree(tree);
 
 
-  calibrationMinimizer::InitHistos(2);
-
-  for(int iEntry=0; iEntry<nentries; ++iEntry ) {
-
-    tree->GetEntry( iEntry );
-    if( iEntry %  1000 == 0 ) std::cout << "Entry: " << iEntry << " / " << nentries << std::endl;
-
-    calibrationMinimizer::FillHisto(0,inputTree->charge_sig[inputTree->xtal11]);
-    calibrationMinimizer::FillHisto(1,inputTree->charge_sig[inputTree->xtal12]);
-
-  }
-
-  //    calibrationMinimizer::setChInt(chargeInt);
-
-    ROOT::Math::Minimizer*    minimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
-    calibrationMinimizer::fitConstants(minimizer);
+  calibrationMinimizer::InitHistos(inputTree,12);
+  calibrationMinimizer::setMatrix(chosen3x3);
+  
+  ROOT::Math::Minimizer*    minimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
+  calibrationMinimizer::fitConstants(minimizer);
 
 
 }

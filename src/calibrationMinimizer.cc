@@ -1,5 +1,6 @@
 #include "interface/calibrationMinimizer.h"
 
+
 using namespace std;
 
 
@@ -7,64 +8,79 @@ namespace calibrationMinimizer{
 
 
   std::vector<float> chInt_;
-  std::vector<TH1F*>  histoChInt_;
   TH1F*  histoTot_;
+  H4AnalysisTree* inputT_;
+  int nXtals_;
+  std::vector<int> chMap;
 
-  void InitHistos(int nXtals){
-     for(int i=0;i<nXtals;++i){
-      TString istring;
-      istring+=i;
-      std::cout<<istring<<std::endl;
-      histoChInt_.push_back(new TH1F("chint_xtal"+istring,"chint_xtal"+istring,300,0,60000));
-    }
-    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",300,0,60000*4);
+  void InitHistos(H4AnalysisTree* tree,int nXtals){
+    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",300,40000,60000);
+    inputT_=tree;
+    nXtals_=nXtals;
   }
-
-  void FillHisto(int ch,float value){
-    histoChInt_[ch]->Fill(value);
-  }
-
-
-  void setChInt(std::vector<float> ch)
-  {
-    for(int i=0;i<ch.size();++i)
-      chInt_.push_back(ch.at(i));
-   
-  }
-
-
-  std::vector<float> getChInt(){
-    return chInt_;
-  }
-
-
-
 
 
   double sigma(const double *par)
   {
-    int nXtal=histoChInt_.size();
-    float chTot=0;
-    float chXtal;
-    for (int i=0;i<nXtal;++i)
-      {
-	for(int j=0;j<histoChInt_[i]->GetNbinsX();++j){
-	  chXtal=histoChInt_[i]->GetBinContent(j);
-	  histoTot_->Fill(chXtal*par[i]);
-	}
-      }
 
-    return histoTot_->GetRMS();
+    float chXtal[nXtals_];
+
+    int nentries = inputT_->fChain->GetEntries();;
+    nentries = 1000;
+
+    for(int iEntry=0; iEntry<nentries; ++iEntry ) {
+
+      inputT_->fChain->GetEntry( iEntry );
+      //      if( iEntry %  1000 == 0 ) std::cout << "Entry: " << iEntry << " / " << nentries << std::endl;
+
+      if (inputT_->nFibresOnX[0]!=2 || inputT_->nFibresOnY[0]!=2) continue;
+
+      float chTot=0;
+      for(int i=0;i<nXtals_;++i){
+	//	if(iEntry==1)	std::cout<<"par:"<<i<<" "<<par[i]<<" "<<std::endl;
+	chXtal[i]=inputT_->charge_sig[chMap[i]];
+	chTot+=chXtal[i]*par[i];
+      }
+      histoTot_->Fill(chTot);
+    }
+
+    //    float rms=histoTot_->GetRMS()/histoTot_->GetMean();
+    float rms=histoTot_->GetRMS();
+    //    std::cout<<rms<<std::endl;
+
+    histoTot_->Reset(); 
+    return rms;
   }
 
 
 
+  void setMatrix(std::string matrix){
+
+    //define here the xtals for a 3x3 matrixs, centered in two different xtals
+    //            xtalMatrix4APD = array.array('i',[tree.xtal1,tree.xtal2,tree.xtal3,tree.xtal6,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal11,tree.xtal14,tree.xtal15,tree.xtal16])
+    //            xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal3,tree.xtal4,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal12,tree.xtal15,tree.xtal16,tree.xtal17])
+
+    if(matrix=="xtal11"){//FIXME do dynamic assignement
+      chMap.push_back(10);
+      chMap.push_back(1);
+      chMap.push_back(2);
+      chMap.push_back(3);
+      chMap.push_back(6);
+      chMap.push_back(7);
+      chMap.push_back(8);
+      chMap.push_back(9);
+      chMap.push_back(11);
+      chMap.push_back(14);
+      chMap.push_back(15);
+      chMap.push_back(16);
+    }
+
+  }
 
 
   void fitConstants(ROOT::Math::Minimizer* minimizer)
   {
-    //    ROOT::Math::Minimizer*    minimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
-    ROOT::Math::Functor f(&sigma,1);
+    ROOT::Math::Functor f(&sigma,nXtals_);
 
     minimizer->SetMaxFunctionCalls(100000);
     minimizer->SetMaxIterations(100);
@@ -73,16 +89,26 @@ namespace calibrationMinimizer{
 
 
     minimizer->SetFunction(f);
-    minimizer->SetLimitedVariable(0,"ic_0",1,1e-2,0,10);
-    minimizer->SetLimitedVariable(1,"ic_1",1,1e-2,0,10);
+
+    minimizer->SetFixedVariable(0,"c_0",1.);//intercalib of central channel is fixed to 1
+
+    for(int i =1;i<nXtals_;++i){
+      TString istring="ic_";
+      istring+=i;
+      //      std::cout<<istring<<endl;
+      minimizer->SetLimitedVariable(i,istring.Data(),1,1e-2,0.5,1.5);
+    }
 
     minimizer->Minimize();
 
     const double* par=minimizer->X();
-    std::cout << "+++++ FIT RESULT: " << par[0] << "," << par[1] << std::endl;
-
+    std::cout << "+++++ FIT RESULT: " <<std::endl;
+    for (int i=0;i<nXtals_;++i){
+	std::cout<<"c_"<<i<<" "<<par[i]<<std::endl;
+      }
 
   }
 
 };
+
 
