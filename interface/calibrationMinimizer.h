@@ -23,5 +23,8 @@ namespace calibrationMinimizer
   void InitHistos(H4AnalysisTree* tree,int nXtals);
   void FillHisto(int ch,float value);
   void setMatrix(std::string matrix);
+  void fixVariable(ROOT::Math::Minimizer* minimizer,int ivar, float value);
+  void limitVariable(ROOT::Math::Minimizer* minimizer,int ivar, float value, float low, float up);
+  int getNXtals();
 }
 #endif

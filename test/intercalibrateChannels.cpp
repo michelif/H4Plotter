@@ -30,6 +30,7 @@ int main( int argc, char* argv[] ) {
 
   std::string runName = "";
   std::string chosen3x3 = "xtal11";
+  int floatVariable=-1;
 
   if( argc>1 ) {
     std::string runName_str(argv[1]);
@@ -37,11 +38,14 @@ int main( int argc, char* argv[] ) {
     if(argc>2){
       std::string matrix(argv[2]);
       chosen3x3=matrix;
+      if(argc>3){
+	floatVariable=atoi(argv[3]);
+      }
     }
   } else {
 
     std::cout << "Usage:" << std::endl;
-    std::cout << "./intercalibrateChannels [runName] ((xtal11),(xtal_4fibres)) " << std::endl;
+    std::cout << "./intercalibrateChannels [runName] ((xtal11),(xtal_4fibres)) (floatVariable)" << std::endl;
     exit(12345);
 
   }
@@ -57,6 +61,16 @@ int main( int argc, char* argv[] ) {
   calibrationMinimizer::setMatrix(chosen3x3);
   
   ROOT::Math::Minimizer*    minimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
+
+  minimizer->SetFixedVariable(0,"c_0",1.);//intercalib of central channel is fixed to 1
+
+  for(int i =1;i<calibrationMinimizer::getNXtals();++i){
+    if(i==floatVariable){
+      calibrationMinimizer::limitVariable(minimizer,i,1,0.5,1.5);
+    }else{
+      calibrationMinimizer::fixVariable(minimizer,i,1);
+    }
+  }
   calibrationMinimizer::fitConstants(minimizer);
 
 

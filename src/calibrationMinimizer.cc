@@ -12,6 +12,8 @@ namespace calibrationMinimizer{
   H4AnalysisTree* inputT_;
   int nXtals_;
   std::vector<int> chMap;
+  std::vector<int> fixedVar;
+  std::vector<int> limitedVar;
 
   void InitHistos(H4AnalysisTree* tree,int nXtals){
     histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",300,40000,60000);
@@ -19,6 +21,10 @@ namespace calibrationMinimizer{
     nXtals_=nXtals;
   }
 
+
+  int getNXtals(){
+    return nXtals_;
+  }
 
   double sigma(const double *par)
   {
@@ -44,8 +50,8 @@ namespace calibrationMinimizer{
       histoTot_->Fill(chTot);
     }
 
-    //    float rms=histoTot_->GetRMS()/histoTot_->GetMean();
-    float rms=histoTot_->GetRMS();
+    float rms=histoTot_->GetRMS()/histoTot_->GetMean();
+    //    float rms=histoTot_->GetRMS();
     //    std::cout<<rms<<std::endl;
 
     histoTot_->Reset(); 
@@ -77,27 +83,33 @@ namespace calibrationMinimizer{
 
   }
 
+  void fixVariable(ROOT::Math::Minimizer* minimizer,int ivar, float value){
+      TString istring="ic_";
+      istring+=ivar;
+      minimizer->SetFixedVariable(ivar,istring.Data(),value);
+  }
+
+  void limitVariable(ROOT::Math::Minimizer* minimizer,int ivar, float value, float low, float up){
+      TString istring="ic_";
+      istring+=ivar;
+      minimizer->SetLimitedVariable(ivar,istring.Data(),value,1e-2,low,up);
+  }
+
 
   void fitConstants(ROOT::Math::Minimizer* minimizer)
   {
     ROOT::Math::Functor f(&sigma,nXtals_);
 
     minimizer->SetMaxFunctionCalls(100000);
-    minimizer->SetMaxIterations(100);
+    minimizer->SetMaxIterations(10000);
     minimizer->SetTolerance(1e-3);
     minimizer->SetPrintLevel(0);
 
 
     minimizer->SetFunction(f);
 
-    minimizer->SetFixedVariable(0,"c_0",1.);//intercalib of central channel is fixed to 1
 
-    for(int i =1;i<nXtals_;++i){
-      TString istring="ic_";
-      istring+=i;
-      //      std::cout<<istring<<endl;
-      minimizer->SetLimitedVariable(i,istring.Data(),1,1e-2,0.5,1.5);
-    }
+
 
     minimizer->Minimize();
 
