@@ -14,6 +14,7 @@ namespace calibrationMinimizer{
   std::vector<int> chMap;
   std::vector<int> fixedVar;
   std::vector<int> limitedVar;
+  std::vector<float> calibConstant;
 
   void InitHistos(H4AnalysisTree* tree,int nXtals){
     histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",300,40000,60000);
@@ -26,13 +27,30 @@ namespace calibrationMinimizer{
     return nXtals_;
   }
 
+  void readConstants(TString filename){
+    std::cout<<"reading calib constants from file: "<<filename<<std::endl;
+    std::fstream myCfgFile(filename.Data(), std::ios_base::in);
+    calibConstant.push_back(1);//central xtal always at 1
+    float a;
+    while (myCfgFile >> a)
+      {
+	calibConstant.push_back(a);
+	std::cout<<a<<std::endl;
+      }
+
+  }
+
+  float getConstant(int iCh){
+    return calibConstant[iCh];
+  }
+
   double sigma(const double *par)
   {
 
     float chXtal[nXtals_];
 
     int nentries = inputT_->fChain->GetEntries();;
-    nentries = 1000;
+    nentries = 25000;
 
     for(int iEntry=0; iEntry<nentries; ++iEntry ) {
 
@@ -87,12 +105,14 @@ namespace calibrationMinimizer{
       TString istring="ic_";
       istring+=ivar;
       minimizer->SetFixedVariable(ivar,istring.Data(),value);
+      fixedVar.push_back(ivar);
   }
 
   void limitVariable(ROOT::Math::Minimizer* minimizer,int ivar, float value, float low, float up){
       TString istring="ic_";
       istring+=ivar;
       minimizer->SetLimitedVariable(ivar,istring.Data(),value,1e-2,low,up);
+      limitedVar.push_back(ivar);
   }
 
 
@@ -116,7 +136,8 @@ namespace calibrationMinimizer{
     const double* par=minimizer->X();
     std::cout << "+++++ FIT RESULT: " <<std::endl;
     for (int i=0;i<nXtals_;++i){
-	std::cout<<"c_"<<i<<" "<<par[i]<<std::endl;
+      if(std::find(limitedVar.begin(), limitedVar.end(), i) != limitedVar.end())std::cout<<"----> minimizer result ----> ";
+      std::cout<<"c_"<<i<<" "<<par[i]<<std::endl;
       }
 
   }

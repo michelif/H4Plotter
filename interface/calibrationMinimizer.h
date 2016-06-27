@@ -9,6 +9,7 @@
 #include "TH1F.h"
 #include "assert.h"
 #include <iostream>
+#include <fstream>
 #include "TCanvas.h"
 #include "TTree.h"
 
@@ -26,5 +27,7 @@ namespace calibrationMinimizer
   void fixVariable(ROOT::Math::Minimizer* minimizer,int ivar, float value);
   void limitVariable(ROOT::Math::Minimizer* minimizer,int ivar, float value, float low, float up);
   int getNXtals();
+  void readConstants(TString filename);
+  float getConstant(int iCh);
 }
 #endif
