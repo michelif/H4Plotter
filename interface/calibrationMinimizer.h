@@ -29,5 +29,6 @@ namespace calibrationMinimizer
   int getNXtals();
   void readConstants(TString filename);
   float getConstant(int iCh);
+  Double_t EffSigma(TH1 * hist);
 }
 #endif

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for iStep in `seq 0 10`;
+for iStep in `seq 6 10`;
 do
     echo "starting step "$iStep
     iStepPlusOne=$((iStep+1))

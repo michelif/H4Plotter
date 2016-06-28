@@ -19,6 +19,7 @@
 #include "interface/calibrationMinimizer.h"
 #include "interface/H4AnalysisTree.h"
 
+#define OPT_ALL 1
 
 int main( int argc, char* argv[] ) {
 
@@ -68,11 +69,12 @@ int main( int argc, char* argv[] ) {
   ROOT::Math::Minimizer*    minimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
 
   minimizer->SetFixedVariable(0,"c_0",1.);//intercalib of central channel is fixed to 1
-  calibrationMinimizer::readConstants("data/optStep"+optimizationStep+".txt");
+  if(!OPT_ALL)  calibrationMinimizer::readConstants("data/optStep"+optimizationStep+".txt");
+  else calibrationMinimizer::readConstants("data/opt_all"+optimizationStep+".txt");
 
   for(int i =1;i<calibrationMinimizer::getNXtals();++i){
-    if(i==floatVariable){
-      calibrationMinimizer::limitVariable(minimizer,i,1,0.5,1.5);
+    if(i==floatVariable || OPT_ALL){
+      calibrationMinimizer::limitVariable(minimizer,i,calibrationMinimizer::getConstant(i),0.5,1.5);
     }else{
       calibrationMinimizer::fixVariable(minimizer,i,calibrationMinimizer::getConstant(i));
     }
