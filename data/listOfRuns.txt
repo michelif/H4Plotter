@@ -1,0 +1,220 @@
+---------------------------------------------------
+Hv scan on the APD gain at 50 GeV:
+Run      energy   position             Gain                 
+4624     50       CRYSTAL_FOUR_FIBERS  50  
+4625     50       CRYSTAL_FOUR_FIBERS  100 
+4626     50       CRYSTAL_FOUR_FIBERS  200 
+
+-------------------------------------------------
+Position scan at 50 GeV with gain 50:
+
+(should be all at gain 50)
+
+run              xtal
+4589           4-fibers  
+4590              6
+4591              6
+4592              14
+4593              15
+4594              17
+4595              18
+4596              13
+4597              12
+4598              5
+4599              4
+4600              3
+4601              2
+4602              1
+
+
+Run         xtal      nevts    
+4627       1     50k (works, pulses observed)
+4628       2     52k (works, pulses observed)
+4629       3     50k (works, pulses observed)
+4630       6     50k (works, pulses observed)
+4631       11    50k (works, pulses observed)
+4632       14    50k (works, pulses observed)
+4633       15    50k (works, pulses observed)
+4634       16    50k (works, pulses observed)
+4635      Pedestals
+
+4636          4-fibers  
+4637          4-fibers-NE
+4638          4-fibers-NW
+4639          4-fibers-SE
+4640          4-fibers-SW
+
+4641     6k events,   gain 50, pedestal run
+
+-Runs on central channels
+
+(these two runs at gain 200)
+4642     7k events,   gain 200, pedestal run  
+4643     crystal 11 
+(Switch to gain 50)
+4644     4k events,   gain 50, pedestal run 
+
+-----------------------------------------------------
+Position scan at 50 GeV with gain 200:
+
+Run      Beam position        
+4668       CRYSTAL_11         
+
+4669   Crystal 4fibers              
+4670   Crystal 4fibers              
+
+4671   Crystal 4Fibers_NE        
+4672   Crystal 4Fibers_NW      
+4673   Crystal 4Fibers_SE
+4674   Crystal 4Fibers_SE
+4675   Crystal 4Fibers_SW      
+4676   Crystal 4Fibers_W       
+4677   Crystal 11_E            
+4678   Crystal 11_W            
+4679   Crystal 11_S            
+4680   Crystal 11_N            
+
+-----------------------------------------------------
+Position scan at 100 GeV with gain 200:
+4682   Crystal 4fibers           
+4683   Crystal 11              
+4684   Crystal4fibers   
+4685   Crystal4fibers_NE   
+4686   Crystal4fibers_NW   
+4687   Crystal4fibers_SE   
+4688   Crystal4fibers_SW   
+4689   Crystal4fibers_W      
+4690   Crystal_11_E              
+4691   Crystal_11_W              
+4692   Crystal_11_S              
+4693   Crystal_11_N
+
+-----------------------------------------------------
+Position scan at 200 GeV with gain 200:
+4694     Crystal_4_fib             
+4695     Crystal_11 
+
+------------------------------------------------------
+Position scan at 20 GeV with gain 200:
+4772          20          Crystal_4Fibers
+4773          20          Crystal_4Fibers
+               
+
+-----------------------------------------------------
+Angular scan:
+-3 degrees:
+Run #    E, GeV     Position                       
+
+4702     100         Crystal_11_3deg             
+4703     100        Crystal_4_fibres_3deg      
+4704     50         Crystal_4_fibres_3deg     
+4705     50         Crystal_11_3deg           
+4706	 200  	    CRYSTAL_11_3DEG	
+4707	 200        CRYSTAL_4FIBERS_3DEG
+4708	 150		CRYSTAL_11_3DEG	     
+4709     150       crystall_four_fibers_3deg 
+4713     20             CRYSTAL_4FIBERS_3DEG
+4714     20             CRYSTAL_11_3DEG     
+4747    200                Crystal_four_fibers_3deg_West               
+4748    200                Crystal_four_fibers_3deg_East               
+4749    200                Crystal_four_fibers_3deg_North              
+4750    200                Crystal_four_fibers_3deg_South              
+4751    200                Crystal_four_fibers_3deg_South              
+4752    50                Crystal_four_fibers_3deg_South
+4753    50                Crystal_four_fibers_3deg_East 
+4755         50           Crystal_4Fibers_3DEG_East     
+4756         50           Crystal_4Fibers_3DEG_West     
+4757         50           Crystal_4Fibers_3DEG_West     
+4758         50           Crystal_4Fibers_3DEG_North    
+4759         50           Crystal_4Fibers_3DEG_South    
+4760         50           Crystal_4Fibers_3DEG_South    
+
+
+-5 degrees:
+4715     50             CRYSTAL_4FIBERS_5DEG  
+4716    50 	     CRYSTAL_4FIBERS_5DEG     
+4717    50             CRYSTAL_11_5DEG        
+4718    50             CRYSTAL_11_5DEG        
+4719    50              CRYSTAL_11_5DEG       
+4720   100          CRYSTAL_FOUR_FIBERS_5DEG  
+4721   100          CRYSTAL_FOUR_FIBERS_5DEG  
+4722   100          CRYSTAL_11_5DEG           
+4723   200         CRYSTAL_11_5DEG            
+4724   200         CRYSTAL_11_5DEG            
+4725   200         CRYSTAL_FOUR_FIBERS_5DEG   
+4726   pedestal run                           
+4775  50 GeV  5deg CRYSTAL_FOUR_FIBERS_5DEG_NORTH 
+4776  50 GeV  5deg CRYSTAL_FOUR_FIBERS_5DEG_SOUTH 
+4777 50 GeV  5deg CRYSTAL_FOUR_FIBERS_5DEG_EAST 
+4778 50 GeV  5deg CRYSTAL_FOUR_FIBERS_5DEG_WEST 
+4779 pedestal run 
+4780 50 GeV  5deg CRYSTAL_11_5DEG_NORTH 
+4781 50 GeV  5deg CRYSTAL_11_5DEG_SOUTH 
+4782 50 GeV  5deg CRYSTAL_11_5DEG_EAST 
+4783 50 GeV  5deg CRYSTAL_11_5DEG_WEST 
+
+-10 degrees:
+4727   200          CRYSTAL_FOUR_FIBERS_10DEG 100k  20:44   
+4728   200          CRYSTAL_11_10DEG                       
+4729   100          CRYSTAL_11_10DEG                       
+4730   100          CRYSTAL_11_10DEG                       
+4731   100          CRYSTAL_FOUR_FIBERS_10DEG 100k  23:41
+4732   50          CRYSTAL_FOUR_FIBERS_10DEG  ~102k  01:40
+4733   50          CRYSTAL_11_10DEG                        
+4734   50          CRYSTAL_11_10DEG                    ~
+4784   50        CRYSTAL_FOUR_FIBERS_10DEG_NORTH 
+4785   50        CRYSTAL_FOUR_FIBERS_10DEG_SOUTH 
+4786   50        CRYSTAL_FOUR_FIBERS_10DEG_EAST 
+
+4787   pedestal run 
+
+
+
+-15 degrees:
+
+4736   50          CRYSTAL_11_15DEG                    
+4737   50          CRYSTAL_11_15DEG                    
+
+4738   50          CRYSTAL_FOUR_FIBERS_15DEG           
+4739   50          CRYSTAL_FOUR_FIBERS_15DEG           
+
+4740  100          CRYSTAL_FOUR_FIBERS_15DEG           
+4741  100          CRYSTAL_11_15DEG                    
+4742   200                 Crystal_11_deg_15deg        
+4743   200                 Crystal_11_deg_15deg        
+4744   200                 Crystal_four_fibers_15deg   
+4745   200                 Crystal_four_fibers_15deg   
+4746   200                 Crystal_four_fibers_15deg   
+
+-12.5 degrees:
+4761         50           Crystal_4Fibers_12.5DEG      
+4762         50           Crystal_11_12.5DEG           
+4763         50           Crystal_11_12.5DEG           
+
+
+-7.5 degrees:
+4764         50           Crystal_11_7.5DEG           
+4765         50           Crystal_4Fibers_7.5DEG      
+
+-----------------------------------------------------
+-MCP runs:
+4766         50           Crystal_4Fibers 
+4767         50           Crystal_4Fibers              
+4768         50           CRYSTAL_11, 50 GeV           
+
+
+4769          20          Crystal_4Fibers              
+4770          20          Crystal_4Fibers              
+4771          20          Crystal_11                   
+
+
+
+------------------------------------------------------
+
+Matrix view:
+
+
+18 || 17 || 16 || 15           || 14||
+13 || 12 || 11 || apd2  apd1   || 6 ||
+                  apd4    apd3 
+5  || 4  ||  3 ||       2      || 1 ||
