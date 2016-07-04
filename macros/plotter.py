@@ -15,6 +15,8 @@ from ROOT import std
 vstring = std.vector(std.string)
 vfloat = std.vector(float)
 
+
+
 #----function to get effSigma of TH1
 def EffSigma( hist ):
 
@@ -93,7 +95,7 @@ def EffSigma( hist ):
             else:
                 ierr=2
 
-        dxf=(total-rlim)*bwid/bin #bin=#events nell'ultimo x toccato
+        dxf=(total-rlim)*bwid/bin #bin=events nell'ultimo x toccato
 #        print "x_right %f x_left %f" % (x_right,x_left)
 #        print "dxf is %f" % dxf 
 #        print "bwid is %f " % bwid 
@@ -132,7 +134,7 @@ def main():
 
     run = cfg.GetOpt(int)("calibration.runXtal11")
     calibC = cfg.GetOpt(vfloat)("calibration.calibConstants")
-
+    ene = cfg.GetOpt(float)("calibration.energy")
 
     print run
     file=ROOT.TFile("../H4Analysis_2016/ntuples/analysis_"+str(run)+".root")
@@ -142,11 +144,27 @@ def main():
 
 #----histo definition---- FIXME move to a function
     outfile=ROOT.TFile("plots/plots_"+str(run)+".root","recreate")
-    hmatrix_xtal11_hodosel_3x3=ROOT.TH1F("chint_xtal11_matrix_hodosel_3x3","chint_xtal11_matrix_hodosel_3x3",500,30000,70000);
+    h_xtal11_hodosel_3x3=ROOT.TH1F("chint_xtal11_hodosel_3x3","chint_xtal11_hodosel_3x3",500,20000*ene/100.,45000*ene/100.);
+    h_xtal11_hodosel_3x3.SetLineColor(ROOT.kBlack)
+
+    h_xtal11_hodosel_3x3_fit=ROOT.TH1F("chint_xtal11_hodosel_3x3_fit","chint_xtal11_hodosel_3x3_fit",500,0,2000*ene/100.);
+    h_xtal11_hodosel_3x3_fit.SetLineColor(ROOT.kBlack)
+
+
+    hmatrix_xtal11_hodosel_3x3=ROOT.TH1F("chint_xtal11_matrix_hodosel_3x3","chint_xtal11_matrix_hodosel_3x3",500,30000*ene/100.,70000*ene/100.);
     hmatrix_xtal11_hodosel_3x3.SetLineColor(ROOT.kBlack)
 
-    hmatrix_xtal11_hodosel_3x3_calib=ROOT.TH1F("chint_xtal11_matrix_hodosel_3x3_calib","chint_xtal11_matrix_hodosel_3x3_calib",500,30000,70000);
-    hmatrix_xtal11_hodosel_3x3_calib.SetLineColor(ROOT.kBlack)
+    h_xtal11_hodosel_3x3_maxAmpl=ROOT.TH1F("maxAmpl_xtal11_hodosel_3x3","maxAmpl_xtal11_hodosel_3x3",500,0,2000*ene/100.);
+
+    hmatrix_xtal11_hodosel_3x3_calib=ROOT.TH1F("chint_xtal11_matrix_hodosel_3x3_calib","chint_xtal11_matrix_hodosel_3x3_calib",500,30000*ene/100.,70000*ene/100.);
+    hmatrix_xtal11_hodosel_3x3_calib.SetLineColor(ROOT.kRed)
+
+
+    hmatrix_xtal11_hodosel_3x3_fit=ROOT.TH1F("chint_xtal11_matrix_hodosel_3x3_fit","chint_xtal11_matrix_hodosel_3x3fit",500,1000*ene/100.,5000*ene/100.);
+    hmatrix_xtal11_hodosel_3x3_fit.SetLineColor(ROOT.kRed)
+
+    hmatrix_xtal11_hodosel_3x3_calib_fit=ROOT.TH1F("chint_xtal11_matrix_hodosel_3x3_calib_fit","chint_xtal11_matrix_hodosel_3x3_calib_fit",500,1000*ene/100.,5000*ene/100.);
+    hmatrix_xtal11_hodosel_3x3_calib_fit.SetLineColor(ROOT.kRed)
 
 
 #----loop over entries-----
@@ -155,26 +173,64 @@ def main():
         #define here the xtals for a 3x3 matrixs, centered in two different xtals
             xtalMatrix4APD = array.array('i',[tree.xtal1,tree.xtal2,tree.xtal3,tree.xtal6,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal11,tree.xtal14,tree.xtal15,tree.xtal16])
             xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal3,tree.xtal4,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal12,tree.xtal15,tree.xtal16,tree.xtal17])
-#            xtalCalibXtal11  = array.array('d',[1,0.521013,0.791507,0.500076,0.504625,0.506267,0.516959,0.502816,1.0016,0.513315,0.691472,0.899462])
+#ordering 2
+#            xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal15,tree.xtal3,tree.xtal16,tree.xtal4apd_1,tree.xtal12,tree.xtal4apd_2,tree.xtal17,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal4])
+
 
         if (entry.nFibresOnX[0]!=2 or entry.nFibresOnX[1]!=2 or entry.nFibresOnY[0]!=2 or entry.nFibresOnY[1]!=2):#showering
             continue
-        if (ROOT.TMath.Abs(entry.X[0])>3 or ROOT.TMath.Abs(entry.X[1])>3 or ROOT.TMath.Abs(entry.Y[0])>3 or ROOT.TMath.Abs(entry.Y[1])>3):
+        if (ROOT.TMath.Abs(entry.X[0])>2. or ROOT.TMath.Abs(entry.X[1])>2. or ROOT.TMath.Abs(entry.Y[0])>2. or ROOT.TMath.Abs(entry.Y[1])>2.):
             continue
-
+        if (ROOT.TMath.Abs(entry.X[0]-entry.X[1])>1.5 or ROOT.TMath.Abs(entry.Y[0]-entry.Y[1])>1.5):
+            continue
+        if(entry.charge_sig[entry.xtal11]<h_xtal11_hodosel_3x3.GetXaxis().GetXmin()+0.10*h_xtal11_hodosel_3x3.GetXaxis().GetXmin()): #hadron cleaning
+            continue
+        
 
         matrixEnXtal11=0
         matrixEnXtal11_calib=0
+        matrixEnXtal11_fit=0
+        matrixEnXtal11_calib_fit=0
         index=0
         for xtal in xtalMatrixXtal11:
             matrixEnXtal11+=entry.charge_sig[xtal]
             matrixEnXtal11_calib+=entry.charge_sig[xtal]*calibC[index]
+            matrixEnXtal11_fit+=entry.fit_ampl[xtal]
+            matrixEnXtal11_calib_fit+=entry.fit_ampl[xtal]*calibC[index]
             index+=1
         hmatrix_xtal11_hodosel_3x3.Fill(matrixEnXtal11)
         hmatrix_xtal11_hodosel_3x3_calib.Fill(matrixEnXtal11_calib)
 
-    print "eff sigma of uncalib is: %f " % EffSigma(hmatrix_xtal11_hodosel_3x3)
-    print "eff sigma of calib is: %f " % EffSigma(hmatrix_xtal11_hodosel_3x3_calib)
+        hmatrix_xtal11_hodosel_3x3_fit.Fill(matrixEnXtal11_fit)
+        hmatrix_xtal11_hodosel_3x3_calib_fit.Fill(matrixEnXtal11_calib_fit)
+
+        h_xtal11_hodosel_3x3.Fill(entry.charge_sig[entry.xtal11])
+        h_xtal11_hodosel_3x3_fit.Fill(entry.fit_ampl[entry.xtal11])
+
+        h_xtal11_hodosel_3x3_maxAmpl.Fill(entry.amp_max[entry.xtal11])
+
+
+    effsigma_xtal11=EffSigma(h_xtal11_hodosel_3x3)
+    effsigma_xtal11_maxAmpl=EffSigma(h_xtal11_hodosel_3x3_maxAmpl)
+    effsigma_matrix_xtal11=EffSigma(hmatrix_xtal11_hodosel_3x3)
+    effsigma_matrix_xtal11_calib=EffSigma(hmatrix_xtal11_hodosel_3x3_calib)
+
+    effsigma_xtal11_fit=EffSigma(h_xtal11_hodosel_3x3_fit)
+    effsigma_matrix_xtal11_fit=EffSigma(hmatrix_xtal11_hodosel_3x3_fit)
+    effsigma_matrix_xtal11_calib_fit=EffSigma(hmatrix_xtal11_hodosel_3x3_calib_fit)
+
+
+    print "eff sigma of single channel is %f and resolution is %f" % (effsigma_xtal11,effsigma_xtal11/(h_xtal11_hodosel_3x3.GetMean()))
+    print "eff sigma of single channel using max ampl is %f and resolution is %f" % (effsigma_xtal11_maxAmpl,effsigma_xtal11_maxAmpl/(h_xtal11_hodosel_3x3_maxAmpl.GetMean()))
+    print "eff sigma of uncalib is: %f and resolution is %f" % (effsigma_matrix_xtal11,effsigma_matrix_xtal11/(hmatrix_xtal11_hodosel_3x3.GetMean()))
+    print "eff sigma of calib is: %f and resolution is %f" % (effsigma_matrix_xtal11_calib,effsigma_matrix_xtal11_calib/(hmatrix_xtal11_hodosel_3x3_calib.GetMean()))
+
+    print "----template fit----"
+    print "eff sigma of single channel is %f and resolution is %f" % (effsigma_xtal11_fit,effsigma_xtal11_fit/(h_xtal11_hodosel_3x3_fit.GetMean()))
+    print "eff sigma of uncalib is: %f and resolution is %f" % (effsigma_matrix_xtal11_fit,effsigma_matrix_xtal11_fit/(hmatrix_xtal11_hodosel_3x3_fit.GetMean()))
+    print "eff sigma of calib is: %f and resolution is %f" % (effsigma_matrix_xtal11_calib_fit,effsigma_matrix_xtal11_calib_fit/(hmatrix_xtal11_hodosel_3x3_calib_fit.GetMean()))
+
+
     outfile.Write()
     outfile.Close()
 
