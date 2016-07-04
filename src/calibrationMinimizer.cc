@@ -17,7 +17,7 @@ namespace calibrationMinimizer{
   std::vector<float> calibConstant;
 
   void InitHistos(H4AnalysisTree* tree,int nXtals){
-    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",300,40000,60000);
+    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",600,35000,60000);
     inputT_=tree;
     nXtals_=nXtals;
   }
@@ -49,13 +49,15 @@ namespace calibrationMinimizer{
 
     float chXtal[nXtals_];
 
-    int nentries = inputT_->fChain->GetEntries();;
+    int nentries = inputT_->fChain->GetEntries();
     nentries = 25000;
 
     for(int iEntry=0; iEntry<nentries; ++iEntry ) {
 
       inputT_->fChain->GetEntry( iEntry );
       //      if( iEntry %  1000 == 0 ) std::cout << "Entry: " << iEntry << " / " << nentries << std::endl;
+
+      //      if (TMath::Abs(inputT_->X[0])>3 or TMath::Abs(inputT_->X[1])>3 or TMath::Abs(inputT_->Y[0])>3 or TMath::Abs(inputT_->Y[1])>3)continue;
 
       if (inputT_->nFibresOnX[0]!=2 || inputT_->nFibresOnY[0]!=2) continue;
 
@@ -168,7 +170,8 @@ namespace calibrationMinimizer{
 
     //define here the xtals for a 3x3 matrixs, centered in two different xtals
     //            xtalMatrix4APD = array.array('i',[tree.xtal1,tree.xtal2,tree.xtal3,tree.xtal6,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal11,tree.xtal14,tree.xtal15,tree.xtal16])
-    //            xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal3,tree.xtal4,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal12,tree.xtal15,tree.xtal16,tree.xtal17])
+    // xtal11      xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal3,tree.xtal4,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal12,tree.xtal15,tree.xtal16,tree.xtal17])
+    // xtal11_2    xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal15,tree.xtal3,tree.xtal16,tree.xtal4apd_1,tree.xtal12,tree.xtal4apd_2,tree.xtal17,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal4])
 
     if(matrix=="xtal11"){//FIXME do dynamic assignement
       chMap.push_back(10);
@@ -183,6 +186,21 @@ namespace calibrationMinimizer{
       chMap.push_back(14);
       chMap.push_back(15);
       chMap.push_back(16);
+    }
+
+    if(matrix=="xtal11_2"){//FIXME do dynamic assignement
+      chMap.push_back(10);
+      chMap.push_back(1);
+      chMap.push_back(14);
+      chMap.push_back(2);
+      chMap.push_back(15);
+      chMap.push_back(6);
+      chMap.push_back(11);
+      chMap.push_back(7);
+      chMap.push_back(16);
+      chMap.push_back(8);
+      chMap.push_back(9);
+      chMap.push_back(3);
     }
 
   }
