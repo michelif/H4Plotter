@@ -98,6 +98,7 @@ Position scan at 200 GeV with gain 200:
 Position scan at 20 GeV with gain 200:
 4772          20          Crystal_4Fibers
 4773          20          Crystal_4Fibers
+4774          20          Crystal_11
                
 
 -----------------------------------------------------
