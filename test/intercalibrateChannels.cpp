@@ -19,7 +19,7 @@
 #include "interface/calibrationMinimizer.h"
 #include "interface/H4AnalysisTree.h"
 
-#define OPT_ALL 1
+#define OPT_ALL 0
 
 int main( int argc, char* argv[] ) {
 
@@ -63,7 +63,8 @@ int main( int argc, char* argv[] ) {
   H4AnalysisTree* inputTree= new H4AnalysisTree(tree);
 
 
-  calibrationMinimizer::InitHistos(inputTree,12);
+  //  calibrationMinimizer::InitHistos(inputTree,12);
+  calibrationMinimizer::InitHistos(inputTree,5);
   calibrationMinimizer::setMatrix(chosen3x3);
   
   ROOT::Math::Minimizer*    minimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
