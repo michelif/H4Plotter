@@ -11,6 +11,7 @@ namespace calibrationMinimizer{
   TH1F*  histoTot_;
   H4AnalysisTree* inputT_;
   int nXtals_;
+  int nParameters_;
   std::vector<int> chMap;
   std::vector<int> fixedVar;
   std::vector<int> limitedVar;
@@ -20,11 +21,21 @@ namespace calibrationMinimizer{
     histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",600,35000,60000);
     inputT_=tree;
     nXtals_=nXtals;
+    nParameters_=nXtals_;
+  }
+
+  void InitHistosConstrained(H4AnalysisTree* tree,int nXtals,int nParameters){
+    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",600,35000,60000);
+    inputT_=tree;
+    nXtals_=nXtals;
+    nParameters_=nParameters;
   }
 
 
   int getNXtals(){
-    return nXtals_;
+    int n=nXtals_;
+    if(nParameters_ != nXtals_) n=nParameters_;
+    return n;
   }
 
   void readConstants(TString filename){
@@ -57,9 +68,10 @@ namespace calibrationMinimizer{
       inputT_->fChain->GetEntry( iEntry );
       //      if( iEntry %  1000 == 0 ) std::cout << "Entry: " << iEntry << " / " << nentries << std::endl;
 
-      //      if (TMath::Abs(inputT_->X[0])>3 or TMath::Abs(inputT_->X[1])>3 or TMath::Abs(inputT_->Y[0])>3 or TMath::Abs(inputT_->Y[1])>3)continue;
+      if (TMath::Abs(inputT_->X[0])>3 or TMath::Abs(inputT_->X[1])>3 or TMath::Abs(inputT_->Y[0])>3 or TMath::Abs(inputT_->Y[1])>3)continue;
 
       if (inputT_->nFibresOnX[0]!=2 || inputT_->nFibresOnY[0]!=2) continue;
+
 
       float chTot=0;
       for(int i=0;i<nXtals_;++i){
@@ -188,20 +200,22 @@ namespace calibrationMinimizer{
       chMap.push_back(16);
     }
 
-    if(matrix=="xtal11_2"){//FIXME do dynamic assignement
-      chMap.push_back(10);
-      chMap.push_back(1);
-      chMap.push_back(14);
-      chMap.push_back(2);
-      chMap.push_back(15);
-      chMap.push_back(6);
-      chMap.push_back(11);
+    if(matrix=="xtal11_FFT"){//FIXME do dynamic assignement, fft files have different ordering since some channels not reconstructed to save time
       chMap.push_back(7);
-      chMap.push_back(16);
+      chMap.push_back(0);
+      chMap.push_back(1);
+      chMap.push_back(2);
+      chMap.push_back(3);
+      chMap.push_back(4);
+      chMap.push_back(5);
+      chMap.push_back(6);
       chMap.push_back(8);
       chMap.push_back(9);
-      chMap.push_back(3);
+      chMap.push_back(10);
+      chMap.push_back(11);
     }
+
+
 
   }
 
@@ -222,7 +236,10 @@ namespace calibrationMinimizer{
 
   void fitConstants(ROOT::Math::Minimizer* minimizer)
   {
-    ROOT::Math::Functor f(&sigma,nXtals_);
+
+    //if(nParameters_==nXtals_)
+    ROOT::Math::Functor f(&sigma,nParameters_);
+    //    else ROOT::Math::Functor f(&sigmaConstrained,nParameters_);
 
     minimizer->SetMaxFunctionCalls(100000);
     minimizer->SetMaxIterations(10000);
@@ -237,7 +254,7 @@ namespace calibrationMinimizer{
 
     const double* par=minimizer->X();
     std::cout << "+++++ FIT RESULT: " <<std::endl;
-    for (int i=0;i<nXtals_;++i){
+    for (int i=0;i<nParameters_;++i){
       if(std::find(limitedVar.begin(), limitedVar.end(), i) != limitedVar.end())std::cout<<"----> minimizer result ----> ";
       std::cout<<"c_"<<i<<" "<<par[i]<<std::endl;
       }
