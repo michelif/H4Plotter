@@ -58,13 +58,17 @@ int main( int argc, char* argv[] ) {
 
 
   
-  TFile*  file=TFile::Open("../H4Analysis_2016/ntuples/analysis_"+TString(runName)+".root");
-  TTree* tree= (TTree*)file->Get("h4");
+  //  TFile*  file=TFile::Open("../H4Analysis_2016/ntuples/analysis_"+TString(runName)+".root");
+  TFile*  file=TFile::Open("../H4Analysis_2016_2/ntuples/FFT_noiseSub_"+TString(runName)+".root");
+  //  TTree* tree= (TTree*)file->Get("h4");
+  TTree* tree= (TTree*)file->Get("fft_digi");
+  TTree* hodoTree= (TTree*)file->Get("hodo");
+  tree->AddFriend(hodoTree);
+
   H4AnalysisTree* inputTree= new H4AnalysisTree(tree);
 
 
-  //  calibrationMinimizer::InitHistos(inputTree,12);
-  calibrationMinimizer::InitHistos(inputTree,5);
+  calibrationMinimizer::InitHistos(inputTree,12);
   calibrationMinimizer::setMatrix(chosen3x3);
   
   ROOT::Math::Minimizer*    minimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
