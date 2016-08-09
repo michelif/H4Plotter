@@ -9,7 +9,7 @@ do
     do
 	echo $i
 #	./bin/intercalibrateChannels 4683 xtal11 $i $iStep &> data/$i.dat
-	./bin/intercalibrateChannels 4683 xtal11 $i $iStep &> data/$i.dat
+	./bin/intercalibrateChannels 4683 xtal11_FFT $i $iStep &> data/$i.dat
 	cat data/$i.dat |grep minimizer|awk '{print $6}'>>data/optStep$iStepPlusOne.txt
     done    
     echo "done step "$iStep
