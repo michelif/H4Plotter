@@ -111,58 +111,118 @@ std::pair<float,float> fitGaus(TH1F* histo, TString runNumberString, float noise
   double fitmax;
 
 
-  fitmin = peakpos-1.2*sigma;
-  fitmax = peakpos+1.2*sigma;
-
+  fitmin = peakpos-1.5*sigma;
+  fitmax = peakpos+1.5*sigma;
 
   RooRealVar x("x","deltaT", fitmin, fitmax);
   RooDataHist data("data","dataset with x",x,RooFit::Import(*histo) );
 
   RooRealVar meanr("meanr","Mean",peakpos+sigma,peakpos-3*sigma, peakpos+3*sigma);
-  RooRealVar width("width","#sigma",sigma , 0, 5.*sigma);
+  RooRealVar width("width","#sigma",sigma/3. , 0., sigma*0.7);
 
   RooGaussian fit_fct("fit_fct","fit_fct",x,meanr,width); 
   fit_fct.fitTo(data);
 
 
 
- RooPlot* frame;
-
- frame = x.frame("Title");
- frame->SetXTitle("Charge Integrated");
- std::string ytitle = Form("Events");
- frame->SetYTitle(ytitle.c_str());
-
- data.plotOn(frame);  //this will show histogram data points on canvas                                                                                                                                                                     
- fit_fct.plotOn(frame);//this will show fit overlay on canvas                                                                                                                                                                              
-
- double rms,rmsErr;
-
- rms = sqrt(width.getVal()*width.getVal()-noiseTerm*noiseTerm);
- rmsErr = width.getError();
- TCanvas* cans = new TCanvas();
- cans->cd();
- frame->Draw();
- TLegend* lego = new TLegend(0.55, 0.8, 0.8, 0.9);
- lego->SetTextSize(0.031);
- lego->AddEntry(  (TObject*)0 ,Form("#sigma = %.1f #pm %.1f", rms, rmsErr), "");
- lego->AddEntry(  (TObject*)0 ,Form("mean = %.1f #pm %.1f", meanr.getVal(), meanr.getError()), "");
- float mean = meanr.getVal();
- float error=getRatioError(rms,meanr.getVal(),rmsErr,meanr.getError());
- lego->AddEntry(  (TObject*)0 ,Form("res = (%.1f  #pm %.1f)%% ",rms/mean*100 ,error*100), "");
-
- lego->SetFillColor(0);
- lego->Draw("same");
-
- TString name = "plots/reso_"+TString(histo->GetName())+"_"+runNumberString;
- if(noiseTerm>0) name+="_noiseSub";
-
- cans->SaveAs(name+".png");
- cans->SaveAs(name+".pdf");
-
- return std::make_pair(rms/mean*100.,error*100);
+  RooPlot* frame;
+  
+  frame = x.frame("Title");
+  frame->SetXTitle("Charge Integrated");
+  std::string ytitle = Form("Events");
+  frame->SetYTitle(ytitle.c_str());
+  
+  data.plotOn(frame);  //this will show histogram data points on canvas                                                                                                                                                                     
+  fit_fct.plotOn(frame);//this will show fit overlay on canvas                                                                                                                                                                              
+  
+  double rms,rmsErr;
+  rms = width.getVal();
+  std::cout<<"rms:"<<rms<<" "<<sigma<<std::endl;
+  //  rms = sqrt(width.getVal()*width.getVal()-noiseTerm*noiseTerm);
+  rmsErr = width.getError();
+  TCanvas* cans = new TCanvas();
+  cans->cd();
+  frame->Draw();
+  TLegend* lego = new TLegend(0.55, 0.8, 0.8, 0.9);
+  lego->SetTextSize(0.031);
+  lego->AddEntry(  (TObject*)0 ,Form("#sigma = %.1f #pm %.1f", rms, rmsErr), "");
+  lego->AddEntry(  (TObject*)0 ,Form("mean = %.1f #pm %.1f", meanr.getVal(), meanr.getError()), "");
+  float mean = meanr.getVal();
+  float error=getRatioError(rms,meanr.getVal(),rmsErr,meanr.getError());
+  lego->AddEntry(  (TObject*)0 ,Form("res = (%.1f  #pm %.1f)%% ",rms/mean*100 ,error*100), "");
+  
+  lego->SetFillColor(0);
+  lego->Draw("same");
+  
+  TString name = "plots/reso_"+TString(histo->GetName())+"_"+runNumberString;
+  if(noiseTerm>0) name+="_noiseSub";
+  
+  cans->SaveAs(name+".png");
+  cans->SaveAs(name+".pdf");
+ 
+  return std::make_pair(rms/mean*100.,error*100);
 
 }
+
+
+std::pair<float,float> fitGausROOT(TH1F* histo, TString runNumberString, float noiseTerm){
+  
+  //  histo->Rebin(2);
+
+
+  double peakpos = histo->GetBinCenter(histo->GetMaximumBin());
+  double sigma = histo->GetRMS();
+
+  double fitmin;
+  double fitmax;
+
+
+  fitmin = peakpos-1.5*sigma;
+  fitmax = peakpos+1.5*sigma;
+
+  TF1 f1("f1","gaus",fitmin,fitmax);
+  f1.SetParameter(0,peakpos);
+  f1.SetParameter(1,sigma);
+  f1.SetLineColor(kBlue);
+  f1.SetLineWidth(2);
+  histo->GetXaxis()->SetRangeUser(fitmin,fitmax);
+  histo->Fit("f1","","",fitmin,fitmax);
+  histo->SetStats(kFALSE);
+  //  RooPlot* frame;
+  
+  double rms,rmsErr;
+  rms = f1.GetParameter(2);
+//  std::cout<<"rms:"<<rms<<" "<<sigma<<std::endl;
+  rms = sqrt(f1.GetParameter(2)*f1.GetParameter(2)-noiseTerm*noiseTerm);
+  rmsErr = f1.GetParError(2);
+  TCanvas* cans = new TCanvas();
+  cans->cd();
+  //  frame->Draw();
+  TLegend* lego = new TLegend(0.55, 0.8, 0.8, 0.9);
+  lego->SetTextSize(0.031);
+  lego->AddEntry(  (TObject*)0 ,Form("#sigma = %.1f #pm %.1f", rms, rmsErr), "");
+  lego->AddEntry(  (TObject*)0 ,Form("mean = %.1f #pm %.1f", f1.GetParameter(1),f1.GetParError(1)), "");
+  float mean = f1.GetParameter(1);
+  float error=getRatioError(rms,f1.GetParameter(1),rmsErr,f1.GetParError(1));
+  lego->AddEntry(  (TObject*)0 ,Form("res = (%.1f  #pm %.1f)%% ",rms/mean*100 ,error*100), "");
+  
+  lego->SetFillColor(0);
+
+
+  histo->Draw("EP");
+  lego->Draw("same");
+  
+  TString name = "plots/reso_"+TString(histo->GetName())+"_"+runNumberString;
+  if(noiseTerm>0) name+="_noiseSub";
+  
+  cans->SaveAs(name+".png");
+  cans->SaveAs(name+".pdf");
+ 
+  return std::make_pair(rms/mean*100.,error*100);
+  //return std::make_pair(100.,100);
+
+}
+
 
 
 int main( int argc, char* argv[] ) {
@@ -193,25 +253,25 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  TH1F* histo_xtal11=(TH1F*)file->Get("chint_xtal11_hodosel_3x3");
-  TH1F* histo_matrix_xtal11=(TH1F*)file->Get("chint_xtal11_matrix_hodosel_3x3_calib");
+  TH1F* histo_xtal11=(TH1F*)file->Get("h_xtal11_ch");
+  TH1F* histo_maxAmpl_xtal11=(TH1F*)file->Get("h_xtal11_ampl");
+  TH1F* histo_maxAmpl_xtal11_fit=(TH1F*)file->Get("h_xtal11_ampl_fit");
+
+  TH1F* histo_xtal11_fft=(TH1F*)file->Get("h_xtal11_ch_FFT");
+  TH1F* histo_maxAmpl_xtal11_fft=(TH1F*)file->Get("h_xtal11_ampl_FFT");
+  TH1F* histo_maxAmpl_xtal11_fit_fft=(TH1F*)file->Get("h_xtal11_ampl_fit_FFT");
+
+  TH1F* histo_matrix_uncalib_xtal11=(TH1F*)file->Get("h_matrix_xtal11_ch");
+  TH1F* histo_matrix_uncalib_xtal11_FFT=(TH1F*)file->Get("h_matrix_xtal11_ch_FFT");
+
+  TH1F* histo_matrix_xtal11=(TH1F*)file->Get("h_matrix_xtal11_ch_calib");
+  TH1F* histo_matrix_xtal11_FFT=(TH1F*)file->Get("h_matrix_xtal11_ch_calib_FFT");
+
+  TH1F* histo_maxAmpl_matrix_xtal11=(TH1F*)file->Get("h_matrix_xtal11_ampl_calib");
+  TH1F* histo_maxAmpl_matrix_xtal11_fft=(TH1F*)file->Get("h_matrix_xtal11_ampl_calib_FFT");
+
 
   TFile* noiseFile = TFile::Open("data/pedestals_4642.root");
-
-  std::vector<int> chMap;
-  chMap.push_back(10);
-  chMap.push_back(1);
-  chMap.push_back(2);
-  chMap.push_back(3);
-  chMap.push_back(6);
-  chMap.push_back(7);
-  chMap.push_back(8);
-  chMap.push_back(9);
-  chMap.push_back(11);
-  chMap.push_back(14);
-  chMap.push_back(15);
-  chMap.push_back(16);
-
 
 
   std::vector<TH1F*> chXtalHisto;
@@ -223,6 +283,12 @@ int main( int argc, char* argv[] ) {
 
 
   fitCB(histo_xtal11, runNumberString,0);
+  fitCB(histo_maxAmpl_xtal11, runNumberString,0);
+  fitCB(histo_maxAmpl_xtal11_fit, runNumberString,0);
+
+  fitCB(histo_xtal11_fft, runNumberString,0);
+  fitCB(histo_maxAmpl_xtal11_fft, runNumberString,0);
+  fitCB(histo_maxAmpl_xtal11_fit_fft, runNumberString,0);
 
   std::pair<float,float> reso_xtal=  fitCB(histo_xtal11, runNumberString,(*sigmaPedestal)[10]);
   
@@ -247,15 +313,24 @@ int main( int argc, char* argv[] ) {
 
   noiseMatrix_xtal11=sqrt(noiseMatrix_xtal11);
 
-  fitGaus(histo_matrix_xtal11, runNumberString,0);
-  std::pair<float,float> reso_matrix  =  fitGaus(histo_matrix_xtal11, runNumberString,noiseMatrix_xtal11);
+  fitGausROOT(histo_matrix_xtal11, runNumberString,0);
+  //  std::pair<float,float> reso_matrix  =  fitGausROOT(histo_matrix_xtal11, runNumberString,noiseMatrix_xtal11);
+  fitGausROOT(histo_matrix_xtal11_FFT, runNumberString,0);
 
-  resolution [1] = reso_matrix.first;
-  resolutionErr [1] = reso_matrix.second;
+  fitGausROOT(histo_matrix_uncalib_xtal11, runNumberString,0);
+  fitGausROOT(histo_matrix_uncalib_xtal11_FFT, runNumberString,0);
 
 
-  resolution.Write("resolution");
-  resolutionErr.Write("resolutionErr");
+
+  //  fitGaus(histo_matrix_xtal11_FFT, runNumberString,0);
+//  std::pair<float,float> reso_matrix  =  fitGaus(histo_matrix_xtal11, runNumberString,noiseMatrix_xtal11);
+//
+//  resolution [1] = reso_matrix.first;
+//  resolutionErr [1] = reso_matrix.second;
+//
+//
+//  resolution.Write("resolution");
+//  resolutionErr.Write("resolutionErr");
 
   outFile->Write();
   outFile->Close();
