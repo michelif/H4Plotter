@@ -31,7 +31,7 @@ float getRatioError( float num, float denom, float numErr, float denomErr ) {
 }
 
 
-std::pair<float,float> fitCB(TH1F* histo, TString runNumberString, float noiseTerm){
+std::pair<float,float> fitCB(TH1F* histo, TString runNumberString, float noiseTerm, std::string prefix){
   
 
 
@@ -90,6 +90,10 @@ std::pair<float,float> fitCB(TH1F* histo, TString runNumberString, float noiseTe
  lego->Draw("same");
 
  TString name = "plots/reso_"+TString(histo->GetName())+"_"+runNumberString;
+ if (prefix!=""){
+   name+="_";
+   name+=prefix;
+ }
  if(noiseTerm>0) name+="_noiseSub";
 
  cans->SaveAs(name+".png");
@@ -100,7 +104,7 @@ std::pair<float,float> fitCB(TH1F* histo, TString runNumberString, float noiseTe
 }
 
 
-std::pair<float,float> fitGaus(TH1F* histo, TString runNumberString, float noiseTerm){
+std::pair<float,float> fitGaus(TH1F* histo, TString runNumberString, float noiseTerm, std::string prefix){
   
 
 
@@ -155,6 +159,10 @@ std::pair<float,float> fitGaus(TH1F* histo, TString runNumberString, float noise
   lego->Draw("same");
   
   TString name = "plots/reso_"+TString(histo->GetName())+"_"+runNumberString;
+  if (prefix!=""){
+   name+="_";
+   name+=prefix;
+  }
   if(noiseTerm>0) name+="_noiseSub";
   
   cans->SaveAs(name+".png");
@@ -165,7 +173,7 @@ std::pair<float,float> fitGaus(TH1F* histo, TString runNumberString, float noise
 }
 
 
-std::pair<float,float> fitGausROOT(TH1F* histo, TString runNumberString, float noiseTerm){
+std::pair<float,float> fitGausROOT(TH1F* histo, TString runNumberString, float noiseTerm, std::string prefix){
   
   //  histo->Rebin(2);
 
@@ -213,6 +221,10 @@ std::pair<float,float> fitGausROOT(TH1F* histo, TString runNumberString, float n
   lego->Draw("same");
   
   TString name = "plots/reso_"+TString(histo->GetName())+"_"+runNumberString;
+  if (prefix!=""){
+    name+="_";
+    name+=prefix;
+  }
   if(noiseTerm>0) name+="_noiseSub";
   
   cans->SaveAs(name+".png");
@@ -235,15 +247,20 @@ int main( int argc, char* argv[] ) {
   }
 
   std::string runName = "";
+  std::string prefix = "";
 
   if( argc>1 ) {
     std::string runName_str(argv[1]);
     runName = runName_str;
+    if( argc>2 ) {
+    std::string prefix_str(argv[2]);
+    prefix = prefix_str;
+    }
   }
   TString runNumberString(runName);
 
   std::string fileName;
-  fileName = "plots/plots_"+runName+".root";
+  fileName = "plots/plots_"+prefix+"_"+runName+".root";
 
   TFile* file = TFile::Open(fileName.c_str());
   if( file==0 ) {
@@ -282,15 +299,15 @@ int main( int argc, char* argv[] ) {
   TVectorD resolutionErr(2);
 
 
-  fitCB(histo_xtal11, runNumberString,0);
-  fitCB(histo_maxAmpl_xtal11, runNumberString,0);
-  fitCB(histo_maxAmpl_xtal11_fit, runNumberString,0);
+  fitCB(histo_xtal11, runNumberString,0,prefix);
+  fitCB(histo_maxAmpl_xtal11, runNumberString,0,prefix);
+  fitCB(histo_maxAmpl_xtal11_fit, runNumberString,0,prefix);
 
-  fitCB(histo_xtal11_fft, runNumberString,0);
-  fitCB(histo_maxAmpl_xtal11_fft, runNumberString,0);
-  fitCB(histo_maxAmpl_xtal11_fit_fft, runNumberString,0);
+  fitCB(histo_xtal11_fft, runNumberString,0,prefix);
+  fitCB(histo_maxAmpl_xtal11_fft, runNumberString,0,prefix);
+  fitCB(histo_maxAmpl_xtal11_fit_fft, runNumberString,0,prefix);
 
-  std::pair<float,float> reso_xtal=  fitCB(histo_xtal11, runNumberString,(*sigmaPedestal)[10]);
+  std::pair<float,float> reso_xtal=  fitCB(histo_xtal11, runNumberString,(*sigmaPedestal)[10],prefix);
   
   resolution [0] = reso_xtal.first;
   resolutionErr [0] = reso_xtal.second;
@@ -313,12 +330,12 @@ int main( int argc, char* argv[] ) {
 
   noiseMatrix_xtal11=sqrt(noiseMatrix_xtal11);
 
-  fitGausROOT(histo_matrix_xtal11, runNumberString,0);
+  fitGausROOT(histo_matrix_xtal11, runNumberString,0,prefix);
   //  std::pair<float,float> reso_matrix  =  fitGausROOT(histo_matrix_xtal11, runNumberString,noiseMatrix_xtal11);
-  fitGausROOT(histo_matrix_xtal11_FFT, runNumberString,0);
+  fitGausROOT(histo_matrix_xtal11_FFT, runNumberString,0,prefix);
 
-  fitGausROOT(histo_matrix_uncalib_xtal11, runNumberString,0);
-  fitGausROOT(histo_matrix_uncalib_xtal11_FFT, runNumberString,0);
+  fitGausROOT(histo_matrix_uncalib_xtal11, runNumberString,0,prefix);
+  fitGausROOT(histo_matrix_uncalib_xtal11_FFT, runNumberString,0,prefix);
 
 
 

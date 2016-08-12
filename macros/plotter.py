@@ -7,6 +7,7 @@ import argparse
 import os
 import subprocess
 import array
+import string
 import ROOT
 import math
 
@@ -166,12 +167,13 @@ def main():
     calibC = cfg.GetOpt(vfloat)("calibration.calibConstants")
     ene = cfg.GetOpt(float)("calibration.energy")
     singleChannel = cfg.GetOpt(bool)("singleChannel")
+    prefix = cfg.GetOpt(string)("prefix")
 
     print run
     if singleChannel:
         print "plotting single channel"
 #    file=ROOT.TFile("../H4Analysis_2016/ntuples/analysis_"+str(run)+".root")
-    file=ROOT.TFile("../H4Analysis_2016_2/ntuples/FFT_noiseSub_"+str(run)+".root")
+    file=ROOT.TFile("../H4Analysis_2016_2/ntuples/"+prefix+"_"+str(run)+".root")
 #    cfgNtuple=file.Get("cfg")
 #    xtalNames = cfgNtuple.GetOpt(std.vector(std.string))("DigiReco.channelsNames")
     tree=file.Get("h4")
@@ -181,7 +183,7 @@ def main():
     treeFFT.AddFriend(treeHodo)
     tree.AddFriend(treeHodo)
 
-    outfile=ROOT.TFile("plots/plots_"+str(run)+".root","recreate")
+    outfile=ROOT.TFile("plots/plots_"+prefix+"_"+str(run)+".root","recreate")
 #----histo definition---- 
     histos={}
     bookHistos(histos,ene,0)
