@@ -92,6 +92,49 @@ namespace calibrationMinimizer{
   }
 
 
+  double sigmaConstrained(const double *par)
+  {
+
+    float chXtal[12];//FIXME
+
+    int nentries = inputT_->fChain->GetEntries();
+    nentries = 40000;
+
+    for(int iEntry=0; iEntry<nentries; ++iEntry ) {
+
+      inputT_->fChain->GetEntry( iEntry );
+      //      if( iEntry %  1000 == 0 ) std::cout << "Entry: " << iEntry << " / " << nentries << std::endl;
+
+      if (TMath::Abs(inputT_->X[0])>3 or TMath::Abs(inputT_->X[1])>3 or TMath::Abs(inputT_->Y[0])>3 or TMath::Abs(inputT_->Y[1])>3)continue;
+
+      if (inputT_->nFibresOnX[0]!=2 || inputT_->nFibresOnY[0]!=2) continue;
+
+
+      float chTot=0;
+      for(int i=0;i<12;++i){//FIXME
+	if(iEntry==1 && i<4)	std::cout<<"par:"<<i<<" "<<par[i]<<" "<<std::endl;
+	chXtal[i]=inputT_->charge_sig[chMap[i]];
+      }
+
+      //      chTot = chXtal[0]*par[0]+chXtal[1]*par[1]+chXtal[2]*1.07*par[2]+chXtal[3]*par[3]+chXtal[4]*par[4]*0.95+chXtal[5]*par[4]*0.93+chXtal[6]*par[4]*1.17+chXtal[7]*par[4]*0.98+chXtal[8]*0.95*par[2]+chXtal[9]*par[5]+chXtal[10]*0.99*par[2]+chXtal[11]*par[6];
+
+      chTot = chXtal[0]*par[0]+chXtal[1]*par[1]*1.03632+chXtal[2]*1.07*par[2]+chXtal[3]*par[1]*0.944709+chXtal[4]*par[3]*0.95+chXtal[5]*par[3]*0.93+chXtal[6]*par[3]*1.17+chXtal[7]*par[3]*0.98+chXtal[8]*0.94*par[2]+chXtal[9]*par[1]*1.07111+chXtal[10]*0.99*par[2]+chXtal[11]*par[1]*0.958860;
+      histoTot_->Fill(chTot);
+      //      std::cout<<chTot<<std::endl;
+    }
+
+    //    float rms=histoTot_->GetRMS()/histoTot_->GetMean();
+    float rms=EffSigma(histoTot_)/histoTot_->GetMean();
+    //float rms=histoTot_->GetRMS();
+    //    std::cout<<rms<<" "<<std::endl;
+    TCanvas dummy;
+    histoTot_->Draw();
+    dummy.SaveAs("dummy.png");
+    histoTot_->Reset(); 
+    return rms;
+  }
+
+
 
   Double_t EffSigma(TH1 * hist)
   {
@@ -215,6 +258,21 @@ namespace calibrationMinimizer{
       chMap.push_back(11);
     }
 
+    if(matrix=="xtal11_2"){//FIXME do dynamic assignement, new files have different ordering since some channels not reconstructed to save time
+      chMap.push_back(7);
+      chMap.push_back(0);
+      chMap.push_back(1);
+      chMap.push_back(2);
+      chMap.push_back(3);
+      chMap.push_back(4);
+      chMap.push_back(5);
+      chMap.push_back(6);
+      chMap.push_back(8);
+      chMap.push_back(9);
+      chMap.push_back(10);
+      chMap.push_back(11);
+    }
+
 
 
   }
@@ -229,7 +287,7 @@ namespace calibrationMinimizer{
   void limitVariable(ROOT::Math::Minimizer* minimizer,int ivar, float value, float low, float up){
       TString istring="ic_";
       istring+=ivar;
-      minimizer->SetLimitedVariable(ivar,istring.Data(),value,1e-2,low,up);
+      minimizer->SetLimitedVariable(ivar,istring.Data(),value,0.005,low,up);
       limitedVar.push_back(ivar);
   }
 
@@ -238,12 +296,12 @@ namespace calibrationMinimizer{
   {
 
     //if(nParameters_==nXtals_)
-    ROOT::Math::Functor f(&sigma,nParameters_);
-    //    else ROOT::Math::Functor f(&sigmaConstrained,nParameters_);
+    //    ROOT::Math::Functor f(&sigma,nParameters_);
+       ROOT::Math::Functor f(&sigmaConstrained,nParameters_);
 
     minimizer->SetMaxFunctionCalls(100000);
-    minimizer->SetMaxIterations(10000);
-    minimizer->SetTolerance(1e-3);
+    minimizer->SetMaxIterations(100000);
+    minimizer->SetTolerance(1e-4);
     minimizer->SetPrintLevel(0);
 
 
