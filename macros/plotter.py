@@ -168,6 +168,10 @@ def main():
     ene = cfg.GetOpt(float)("calibration.energy")
     singleChannel = cfg.GetOpt(bool)("singleChannel")
     prefix = cfg.GetOpt(string)("prefix")
+    if(cfg.OptExist("suffix")):
+        suffix = cfg.GetOpt(string)("suffix")
+    else:
+        suffix = ""
 
     print run
     if singleChannel:
@@ -183,7 +187,7 @@ def main():
     treeFFT.AddFriend(treeHodo)
     tree.AddFriend(treeHodo)
 
-    outfile=ROOT.TFile("plots/plots_"+prefix+"_"+str(run)+".root","recreate")
+    outfile=ROOT.TFile("plots/plots_"+prefix+"_"+suffix+str(run)+".root","recreate")
 #----histo definition---- 
     histos={}
     bookHistos(histos,ene,0)
