@@ -20,18 +20,22 @@ vfloat = std.vector(float)
 #----function to book histos
 def bookHistos(histos,ene,isFFT):
     if not isFFT:
-        histos["h_xtal11_ch"]=ROOT.TH1F("h_xtal11_ch","h_xtal11_ch",500,20000*ene/100.,45000*ene/100.);
-        histos["h_xtal11_ampl_fit"]=ROOT.TH1F("h_xtal11_ampl_fit","h_xtal11_ampl_fit",500,0,2000*ene/100.)
-        
-        histos["h_matrix_xtal11_ch"]=ROOT.TH1F("h_matrix_xtal11_ch","h_matrix_xtal11_ch",500,30000*ene/100.,70000*ene/100.)
-        histos["h_xtal11_ampl"]=ROOT.TH1F("h_xtal11_ampl","h_xtal11_ampl",500,0,2000*ene/100.)
-        
-        histos["h_matrix_xtal11_ch_calib"]=ROOT.TH1F("h_matrix_xtal11_ch_calib","h_matrix_xtal11_ch_calib",500,30000*ene/100.,70000*ene/100.)
+        nBins=500
+        if ene==20:
+            nBins=200
 
-        histos["h_matrix_xtal11_ampl"]=ROOT.TH1F("h_matrix_xtal11_ampl","h_matrix_xtal11_ampl",500,1000*ene/100.,5000*ene/100.)        
-        histos["h_matrix_xtal11_ampl_fit"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit","h_matrix_xtal11_ampl_fit",500,1000*ene/100.,5000*ene/100.)
+        histos["h_xtal11_ch"]=ROOT.TH1F("h_xtal11_ch","h_xtal11_ch",nBins,20000*ene/100.,45000*ene/100.)
+        histos["h_xtal11_ampl_fit"]=ROOT.TH1F("h_xtal11_ampl_fit","h_xtal11_ampl_fit",nBins,0,2000*ene/100.)
         
-        histos["h_matrix_xtal11_ampl_fit_calib"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit_calib","h_matrix_xtal11_ampl_fit_calib",500,1000*ene/100.,5000*ene/100.)
+        histos["h_matrix_xtal11_ch"]=ROOT.TH1F("h_matrix_xtal11_ch","h_matrix_xtal11_ch",nBins,30000*ene/100.,70000*ene/100.)
+        histos["h_xtal11_ampl"]=ROOT.TH1F("h_xtal11_ampl","h_xtal11_ampl",nBins,0,2000*ene/100.)
+        
+        histos["h_matrix_xtal11_ch_calib"]=ROOT.TH1F("h_matrix_xtal11_ch_calib","h_matrix_xtal11_ch_calib",nBins,30000*ene/100.,70000*ene/100.)
+
+        histos["h_matrix_xtal11_ampl"]=ROOT.TH1F("h_matrix_xtal11_ampl","h_matrix_xtal11_ampl",nBins,1000*ene/100.,5000*ene/100.)        
+        histos["h_matrix_xtal11_ampl_fit"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit","h_matrix_xtal11_ampl_fit",nBins,1000*ene/100.,5000*ene/100.)
+        
+        histos["h_matrix_xtal11_ampl_fit_calib"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit_calib","h_matrix_xtal11_ampl_fit_calib",nBins,1000*ene/100.,5000*ene/100.)
 
     else:
         histos["h_xtal11_ch_FFT"]=ROOT.TH1F("h_xtal11_ch_FFT","h_xtal11_ch_FFT",500,20000*ene/100.,45000*ene/100.);
@@ -219,6 +223,8 @@ def main():
             continue
         if(entry.charge_sig[entry.xtal11]<histos["h_xtal11_ch"].GetXaxis().GetXmin()+0.10*histos["h_xtal11_ch"].GetXaxis().GetXmin()): #hadron cleaning
             continue
+        if(ene==200 and entry.charge_sig[entry.xtal11]<67000):
+            continue; #hadron contamination at 200 gev?or not containment?
 
         if singleChannel != 1:
             matrixEnXtal11=0
