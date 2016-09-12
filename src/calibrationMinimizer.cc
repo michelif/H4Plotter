@@ -18,7 +18,12 @@ namespace calibrationMinimizer{
   std::vector<float> calibConstant;
 
   void InitHistos(H4AnalysisTree* tree,int nXtals){
-    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",600,35000,60000);
+    //100 GeV
+    //    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",600,35000,60000);
+    //200 GeV
+    //    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",600,35000*2,60000*2);
+    //100 GeV - 4apd
+    histoTot_= new TH1F("chint_xtal_total","chint_xtal_total",600,100000,150000);
     inputT_=tree;
     nXtals_=nXtals;
     nParameters_=nXtals_;
@@ -69,25 +74,38 @@ namespace calibrationMinimizer{
       //      if( iEntry %  1000 == 0 ) std::cout << "Entry: " << iEntry << " / " << nentries << std::endl;
 
       if (TMath::Abs(inputT_->X[0])>3 or TMath::Abs(inputT_->X[1])>3 or TMath::Abs(inputT_->Y[0])>3 or TMath::Abs(inputT_->Y[1])>3)continue;
+      //      if (TMath::Abs(inputT_->X[0])>2 or TMath::Abs(inputT_->X[1])>2 or TMath::Abs(inputT_->Y[0])>2 or TMath::Abs(inputT_->Y[1])>2)continue;
 
       if (inputT_->nFibresOnX[0]!=2 || inputT_->nFibresOnY[0]!=2) continue;
 
 
       float chTot=0;
       for(int i=0;i<nXtals_;++i){
-	//	if(iEntry==1)	std::cout<<"par:"<<i<<" "<<par[i]<<" "<<std::endl;
 	chXtal[i]=inputT_->charge_sig[chMap[i]];
+	//	if(iEntry%2==0)std::cout<<"par:"<<i<<" "<<par[i]<<" "<<chXtal[i]<<std::endl;
+
 	chTot+=chXtal[i]*par[i];
+	//	if(i==10)std::cout<<chXtal[i]<<std::endl;
       }
       histoTot_->Fill(chTot);
     }
 
-    //    float rms=histoTot_->GetRMS()/histoTot_->GetMean();
-    float rms=EffSigma(histoTot_)/histoTot_->GetMean();
+    //   float rms_1=histoTot_->GetRMS();
+    //    float rms=EffSigma(histoTot_)/histoTot_->GetMean();
+    float rms_1=EffSigma(histoTot_);
+
+    float    rms = sqrt(rms_1*rms_1-8.03337e+02*8.03337e+02)/histoTot_->GetMean();
+
     //    float rms=histoTot_->GetRMS();
-    //    std::cout<<rms<<std::endl;
+//       std::cout<<rms<<" "<<par[8]<<std::endl;
+//
+//       TCanvas dummy;
+//       histoTot_->Draw();
+//       dummy.SaveAs("dummy.png");
+
 
     histoTot_->Reset(); 
+
     return rms;
   }
 
@@ -273,6 +291,21 @@ namespace calibrationMinimizer{
       chMap.push_back(11);
     }
 
+    if(matrix=="xtal4apd"){//FIXME do dynamic assignement
+      chMap.push_back(3);
+      chMap.push_back(4);
+      chMap.push_back(5);
+      chMap.push_back(6);
+      chMap.push_back(7);
+      chMap.push_back(0);
+      chMap.push_back(1);
+      chMap.push_back(9);
+      chMap.push_back(10);
+      chMap.push_back(13);
+      chMap.push_back(14);
+      chMap.push_back(15);
+    }
+
 
 
   }
@@ -296,12 +329,12 @@ namespace calibrationMinimizer{
   {
 
     //if(nParameters_==nXtals_)
-    //    ROOT::Math::Functor f(&sigma,nParameters_);
-       ROOT::Math::Functor f(&sigmaConstrained,nParameters_);
+    ROOT::Math::Functor f(&sigma,nParameters_);
+    //       ROOT::Math::Functor f(&sigmaConstrained,nParameters_);
 
-    minimizer->SetMaxFunctionCalls(100000);
-    minimizer->SetMaxIterations(100000);
-    minimizer->SetTolerance(1e-4);
+    minimizer->SetMaxFunctionCalls(100);
+    minimizer->SetMaxIterations(100);
+    minimizer->SetTolerance(1e-3);
     minimizer->SetPrintLevel(0);
 
 
