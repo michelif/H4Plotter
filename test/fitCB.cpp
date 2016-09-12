@@ -175,7 +175,7 @@ std::pair<float,float> fitGaus(TH1F* histo, TString runNumberString, float noise
 
 std::pair<float,float> fitGausROOT(TH1F* histo, TString runNumberString, float noiseTerm, std::string prefix){
   
-  histo->Rebin(2);
+  //  histo->Rebin(2);
 
 
   double peakpos = histo->GetBinCenter(histo->GetMaximumBin());
@@ -329,6 +329,7 @@ int main( int argc, char* argv[] ) {
 
 
   noiseMatrix_xtal11=sqrt(noiseMatrix_xtal11);
+  noiseMatrix_xtal11=8.03337e+02;
 
   TH1F* cloneHisto=(TH1F*)histo_matrix_xtal11->Clone();
   fitGausROOT(histo_matrix_xtal11, runNumberString,0,prefix);
