@@ -20,10 +20,13 @@ vfloat = std.vector(float)
 
 #----function to book histos
 def bookHistos(histos):
-    histos["h_res_APD1"]=ROOT.TH1F("h_res_APD1","h_res_APD1",100,4.,5.);
-    histos["h_res_APD2"]=ROOT.TH1F("h_res_APD2","h_res_APD2",100,3.5,4.5);
-    histos["h_res_APD1vsAPD2"]=ROOT.TH1F("h_res_APD1vsAPD2","h_res_APD1vsAPD2",100,0,1.);
+    histos["h_res_APD1"]=ROOT.TH1F("h_res_APD1","h_res_APD1",150,3.5,5.);
+    histos["h_res_APD2"]=ROOT.TH1F("h_res_APD2","h_res_APD2",150,3.5,5);
+    histos["h_res_APD1vsAPD2"]=ROOT.TH1F("h_res_APD1vsAPD2","h_res_APD1vsAPD2",150,-0.5,1.5);
     
+#    histos["h_res_time_APD1"]=ROOT.TH1F("h_res_time_APD1","h_res_time_APD1",100,4.,5.);
+#    histos["h_res_time_APD2"]=ROOT.TH1F("h_res_time_APD2","h_res_time_APD2",100,3.5,4.5);
+#    histos["h_res_time_APD1vsAPD2"]=ROOT.TH1F("h_res_time_APD1vsAPD2","h_res_time_APD1vsAPD2",100,0,1.);
     
 
 #-----main function-----
@@ -86,6 +89,11 @@ def main():
         histos["h_res_APD2"].Fill(entry.fit_time[entry.APD2]-entry.time[entry.MCP1])
         histos["h_res_APD1vsAPD2"].Fill(entry.fit_time[entry.APD1]-entry.fit_time[entry.APD2])
 
+#        histos["h_res_time_APD1"].Fill(entry.time[entry.APD1]-entry.time[entry.MCP1])
+#        histos["h_res_time_APD2"].Fill(entry.time[entry.APD2]-entry.time[entry.MCP1])
+#        histos["h_res_time_APD1vsAPD2"].Fill(entry.time[entry.APD1]-entry.time[entry.APD2])
+
+
     f1=ROOT.TF1("f1","gaus")
     f2=ROOT.TF1("f2","gaus")
     f3=ROOT.TF1("f3","gaus")
@@ -98,14 +106,38 @@ def main():
 
     res[0] = math.sqrt(f1.GetParameter(2)*f1.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
     res[1] = math.sqrt(f2.GetParameter(2)*f2.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
-    res[2] = f3.GetParameter(2)/math.sqrt(2) #resolution one single apd do weighted
+    res[2] = math.sqrt(f3.GetParameter(2)*f3.GetParameter(2)*(1-res[0]*res[0]/(res[0]*res[0]+res[1]*res[1]))) #resolution one single apd 
 
     resErr[0] = f1.GetParError(2)
     resErr[1] = f2.GetParError(2)
-    resErr[2] = f3.GetParError(2)/math.sqrt(2)
+    resErr[2] = math.sqrt(f3.GetParError(2)*f3.GetParError(2)/2)
 
     res.Write("timingResolution")
     resErr.Write("timingResolutionError")
+
+
+    #not using template fit
+#    f1_time=ROOT.TF1("f1_time","gaus")
+#    f2_time=ROOT.TF1("f2_time","gaus")
+#    f3_time=ROOT.TF1("f3_time","gaus")
+#    histos["h_res_time_APD1"].Fit("f1_time")
+#    histos["h_res_time_APD2"].Fit("f2_time")
+#    histos["h_res_time_APD1vsAPD2"].Fit("f3_time")
+#
+#    res_time = ROOT.TVectorD(3)
+#    resErr_time = ROOT.TVectorD(3)
+#
+#    res_time[0] = math.sqrt(f1_time.GetParameter(2)*f1_time.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
+#    res_time[1] = math.sqrt(f2_time.GetParameter(2)*f2_time.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
+#    res_time[2] = f3_time.GetParameter(2)/math.sqrt(2) #resolution one single apd do weighted
+#
+#    resErr[0] = f1_time.GetParError(2)
+#    resErr[1] = f2_time.GetParError(2)
+#    resErr[2] = f3_time.GetParError(2)/math.sqrt(2)
+#
+#    res_time.Write("timingResolution_time")
+#    resErr_time.Write("timingResolutionError_time")
+
 
     outfile.Write()
     outfile.Close()
