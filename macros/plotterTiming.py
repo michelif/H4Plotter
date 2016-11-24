@@ -22,6 +22,7 @@ vfloat = std.vector(float)
 def bookHistos(histos):
     histos["h_res_APD1"]=ROOT.TH1F("h_res_APD1","h_res_APD1",150,3.5,5.);
     histos["h_res_APD2"]=ROOT.TH1F("h_res_APD2","h_res_APD2",150,3.5,5);
+    histos["h_res_APD1andAPD2"]=ROOT.TH1F("h_res_APD1andAPD2","h_res_APD1andAPD2",150,3.5,5);
     histos["h_res_APD1vsAPD2"]=ROOT.TH1F("h_res_APD1vsAPD2","h_res_APD1vsAPD2",150,-0.5,1.5);
     
 #    histos["h_res_time_APD1"]=ROOT.TH1F("h_res_time_APD1","h_res_time_APD1",100,4.,5.);
@@ -40,18 +41,26 @@ def main():
                       help="run number")
     parser.add_argument("-p", "--prefix", default='',metavar='prefix',type=str,
                       help="prefix")
+    parser.add_argument("-f", "--fft",dest='usefft',action='store_true',
+                       help="use fft tree")
+    parser.set_defaults(usefft=False)
+
 
 
     args = parser.parse_args()
     run = args.run
     prefix = args.prefix
-
-
+    usefft = args.usefft
 
     file=ROOT.TFile("../H4Analysis_2016_2/ntuples/"+prefix+"_"+str(run)+".root")
 #    cfgNtuple=file.Get("cfg")
 #    xtalNames = cfgNtuple.GetOpt(std.vector(std.string))("DigiReco.channelsNames")
     tree=file.Get("h4")
+    if (usefft):
+        print "Using fft tree"
+        tree=file.Get("fft_digi")
+        
+
     treeHodo=file.Get("hodo")
 
     tree.AddFriend(treeHodo)
@@ -88,6 +97,7 @@ def main():
         histos["h_res_APD1"].Fill(entry.fit_time[entry.APD1]-entry.time[entry.MCP1])
         histos["h_res_APD2"].Fill(entry.fit_time[entry.APD2]-entry.time[entry.MCP1])
         histos["h_res_APD1vsAPD2"].Fill(entry.fit_time[entry.APD1]-entry.fit_time[entry.APD2])
+        histos["h_res_APD1andAPD2"].Fill((entry.fit_time[entry.APD2]+entry.fit_time[entry.APD1])/2.-entry.time[entry.MCP1])
 
 #        histos["h_res_time_APD1"].Fill(entry.time[entry.APD1]-entry.time[entry.MCP1])
 #        histos["h_res_time_APD2"].Fill(entry.time[entry.APD2]-entry.time[entry.MCP1])
@@ -97,20 +107,24 @@ def main():
     f1=ROOT.TF1("f1","gaus")
     f2=ROOT.TF1("f2","gaus")
     f3=ROOT.TF1("f3","gaus")
+    f4=ROOT.TF1("f4","gaus")
     histos["h_res_APD1"].Fit("f1")
     histos["h_res_APD2"].Fit("f2")
     histos["h_res_APD1vsAPD2"].Fit("f3")
+    histos["h_res_APD1andAPD2"].Fit("f4")
 
-    res = ROOT.TVectorD(3)
-    resErr = ROOT.TVectorD(3)
+    res = ROOT.TVectorD(4)
+    resErr = ROOT.TVectorD(4)
 
     res[0] = math.sqrt(f1.GetParameter(2)*f1.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
     res[1] = math.sqrt(f2.GetParameter(2)*f2.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
     res[2] = math.sqrt(f3.GetParameter(2)*f3.GetParameter(2)*(1-res[0]*res[0]/(res[0]*res[0]+res[1]*res[1]))) #resolution one single apd 
+    res[3] = math.sqrt(f4.GetParameter(2)*f4.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
 
     resErr[0] = f1.GetParError(2)
     resErr[1] = f2.GetParError(2)
     resErr[2] = math.sqrt(f3.GetParError(2)*f3.GetParError(2)/2)
+    resErr[3] = f4.GetParError(2)
 
     res.Write("timingResolution")
     resErr.Write("timingResolutionError")
