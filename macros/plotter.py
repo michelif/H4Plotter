@@ -18,24 +18,51 @@ vfloat = std.vector(float)
 
 
 #----function to book histos
-def bookHistos(histos,ene,isFFT):
+def bookHistos(histos,ene,isFFT,isXtal11):
     if not isFFT:
-        nBins=500
-        if ene==20:
+        if isXtal11:
             nBins=200
+            if ene==200 or ene==50:
+                nBins=200
+            if ene==20:
+                nBins=200
 
-        histos["h_xtal11_ch"]=ROOT.TH1F("h_xtal11_ch","h_xtal11_ch",nBins,20000*ene/100.,45000*ene/100.)
-        histos["h_xtal11_ampl_fit"]=ROOT.TH1F("h_xtal11_ampl_fit","h_xtal11_ampl_fit",nBins,0,2000*ene/100.)
-        
-        histos["h_matrix_xtal11_ch"]=ROOT.TH1F("h_matrix_xtal11_ch","h_matrix_xtal11_ch",nBins,30000*ene/100.,70000*ene/100.)
-        histos["h_xtal11_ampl"]=ROOT.TH1F("h_xtal11_ampl","h_xtal11_ampl",nBins,0,2000*ene/100.)
-        
-        histos["h_matrix_xtal11_ch_calib"]=ROOT.TH1F("h_matrix_xtal11_ch_calib","h_matrix_xtal11_ch_calib",nBins,30000*ene/100.,70000*ene/100.)
+            histos["h_xtal11_ch"]=ROOT.TH1F("h_xtal11_ch","h_xtal11_ch",nBins,20000*ene/100.,45000*ene/100.)
+            histos["h_xtal11_ampl_fit"]=ROOT.TH1F("h_xtal11_ampl_fit","h_xtal11_ampl_fit",nBins,0,2000*ene/100.)
+            
+            histos["h_matrix_xtal11_ch"]=ROOT.TH1F("h_matrix_xtal11_ch","h_matrix_xtal11_ch",nBins,30000*ene/100.,70000*ene/100.)
+            histos["h_xtal11_ampl"]=ROOT.TH1F("h_xtal11_ampl","h_xtal11_ampl",nBins,0,2000*ene/100.)
+            
+            histos["h_matrix_xtal11_ch_calib"]=ROOT.TH1F("h_matrix_xtal11_ch_calib","h_matrix_xtal11_ch_calib",nBins,30000*ene/100.,70000*ene/100.)
+            
+            histos["h_matrix_xtal11_ampl"]=ROOT.TH1F("h_matrix_xtal11_ampl","h_matrix_xtal11_ampl",nBins,1000*ene/100.,5000*ene/100.)        
+            histos["h_matrix_xtal11_ampl_fit"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit","h_matrix_xtal11_ampl_fit",nBins,1000*ene/100.,5000*ene/100.)
+            
+            histos["h_matrix_xtal11_ampl_fit_calib"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit_calib","h_matrix_xtal11_ampl_fit_calib",nBins,1000*ene/100.,5000*ene/100.)
+        else:
+            nBins=200
+            xUp=160000
+            if ene==20:
+                nBins=200
+            if ene==200:
+                xUp=180000
 
-        histos["h_matrix_xtal11_ampl"]=ROOT.TH1F("h_matrix_xtal11_ampl","h_matrix_xtal11_ampl",nBins,1000*ene/100.,5000*ene/100.)        
-        histos["h_matrix_xtal11_ampl_fit"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit","h_matrix_xtal11_ampl_fit",nBins,1000*ene/100.,5000*ene/100.)
-        
-        histos["h_matrix_xtal11_ampl_fit_calib"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit_calib","h_matrix_xtal11_ampl_fit_calib",nBins,1000*ene/100.,5000*ene/100.)
+            histos["h_xtal11_ch"]=ROOT.TH1F("h_xtal11_ch","h_xtal11_ch",nBins,90000*ene/100.,130000*ene/100.)
+            histos["h_xtal11_ampl_fit"]=ROOT.TH1F("h_xtal11_ampl_fit","h_xtal11_ampl_fit",nBins,0,5000*ene/100.)
+            
+            histos["h_matrix_xtal11_ch"]=ROOT.TH1F("h_matrix_xtal11_ch","h_matrix_xtal11_ch",nBins,900000*ene/100.,xUp*ene/100.)
+            histos["h_xtal11_ampl"]=ROOT.TH1F("h_xtal11_ampl","h_xtal11_ampl",nBins,0,6000*ene/100.)
+            
+            histos["h_matrix_xtal11_ch_calib"]=ROOT.TH1F("h_matrix_xtal11_ch_calib","h_matrix_xtal11_ch_calib",nBins,900000*ene/100.,xUp*ene/100.)
+            
+            histos["h_matrix_xtal11_ampl"]=ROOT.TH1F("h_matrix_xtal11_ampl","h_matrix_xtal11_ampl",nBins,3000*ene/100.,6000*ene/100.)        
+            histos["h_matrix_xtal11_ampl_fit"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit","h_matrix_xtal11_ampl_fit",nBins,3000*ene/100.,6000*ene/100.)
+            
+            histos["h_matrix_xtal11_ampl_fit_calib"]=ROOT.TH1F("h_matrix_xtal11_ampl_fit_calib","h_matrix_xtal11_ampl_fit_calib",nBins,3000*ene/100.,6000*ene/100.)
+            histos["h_LRvsY"]=ROOT.TH2F("h_LRvsY","h_LRvsY",20,-10,10,100,0,0.1)
+            histos["h_LRvsY_calib"]=ROOT.TH2F("h_LRvsY_calib","h_LRvsY_calib",20,-10,10,100,0,0.1)
+            histos["h_LRvsX"]=ROOT.TH2F("h_LRvsX","h_LRvsX",20,-10,10,100,0,0.1)
+            histos["h_LRvsX_calib"]=ROOT.TH2F("h_LRvsX_calib","h_LRvsX_calib",20,-10,10,100,0,0.1)
 
     else:
         histos["h_xtal11_ch_FFT"]=ROOT.TH1F("h_xtal11_ch_FFT","h_xtal11_ch_FFT",500,20000*ene/100.,45000*ene/100.);
@@ -166,16 +193,21 @@ def main():
         cfg.ParseConfigFile(args.cfg)
 
     cfg.Print()
-
-    run = cfg.GetOpt(int)("calibration.runXtal11")
+    isXtal11 = cfg.GetOpt(bool)("calibration.isXtal11")
+    if isXtal11:
+        run = cfg.GetOpt(int)("calibration.runXtal11")
+    else:
+        run = cfg.GetOpt(int)("calibration.run4APD")
     calibC = cfg.GetOpt(vfloat)("calibration.calibConstants")
     ene = cfg.GetOpt(float)("calibration.energy")
     singleChannel = cfg.GetOpt(bool)("singleChannel")
     prefix = cfg.GetOpt(string)("prefix")
+
     if(cfg.OptExist("suffix")):
         suffix = cfg.GetOpt(string)("suffix")
     else:
         suffix = ""
+    
 
     print run
     if singleChannel:
@@ -194,10 +226,10 @@ def main():
     outfile=ROOT.TFile("plots/plots_"+prefix+"_"+suffix+str(run)+".root","recreate")
 #----histo definition---- 
     histos={}
-    bookHistos(histos,ene,0)
+    bookHistos(histos,ene,0,isXtal11)
 #----histo for FFT-----
     histos_FFT={}
-    bookHistos(histos_FFT,ene,1)
+    bookHistos(histos_FFT,ene,1,isXtal11)
 
 
 #----loop over entries-----
@@ -205,8 +237,13 @@ def main():
     for entry in tree:
         #define here the xtals for a 3x3 matrixs, centered in two different xtals
         if setMatrix:
-            #                xtalMatrix4APD = array.array('i',[tree.xtal1,tree.xtal2,tree.xtal3,tree.xtal6,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal11,tree.xtal14,tree.xtal15,tree.xtal16])
-            xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal3,tree.xtal4,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal12,tree.xtal15,tree.xtal16,tree.xtal17])
+            if isXtal11:
+                print "using xtal11 matrix"
+                #                xtalMatrix4APD = array.array('i',[tree.xtal1,tree.xtal2,tree.xtal3,tree.xtal6,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal11,tree.xtal14,tree.xtal15,tree.xtal16])
+                xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal3,tree.xtal4,tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal12,tree.xtal15,tree.xtal16,tree.xtal17])
+            else:
+                print "using 4 apd matrix"
+                xtalMatrixXtal11 = array.array('i',[tree.xtal4apd_1,tree.xtal4apd_2,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal11,tree.xtal2,tree.xtal3,tree.xtal15,tree.xtal16,tree.xtal1,tree.xtal6,tree.xtal14])
             setMatrix=False
 #ordering 2
 #            xtalMatrixXtal11 = array.array('i',[tree.xtal11,tree.xtal2,tree.xtal15,tree.xtal3,tree.xtal16,tree.xtal4apd_1,tree.xtal12,tree.xtal4apd_2,tree.xtal17,tree.xtal4apd_3,tree.xtal4apd_4,tree.xtal4])
@@ -217,14 +254,32 @@ def main():
 
         if (entry.nFibresOnX[0]!=2 or entry.nFibresOnX[1]!=2 or entry.nFibresOnY[0]!=2 or entry.nFibresOnY[1]!=2):#showering
             continue
-        if (ROOT.TMath.Abs(entry.X[0])>2. or ROOT.TMath.Abs(entry.X[1])>2. or ROOT.TMath.Abs(entry.Y[0])>2. or ROOT.TMath.Abs(entry.Y[1])>2.):
+        if(ROOT.TMath.Abs(entry.X[0])<2):
+            ch_LR = (entry.charge_sig[entry.xtal11]+entry.charge_sig[entry.xtal6])/(entry.charge_sig[entry.xtal4apd_1]+entry.charge_sig[entry.xtal4apd_2]+entry.charge_sig[entry.xtal4apd_3]+entry.charge_sig[entry.xtal4apd_4])
+            ch_LR_calib = (entry.charge_sig[entry.xtal11]*calibC[4]+entry.charge_sig[entry.xtal6]*calibC[10])/(entry.charge_sig[entry.xtal4apd_1]*calibC[0]+entry.charge_sig[entry.xtal4apd_2]*calibC[1]+entry.charge_sig[entry.xtal4apd_3]*calibC[2]+entry.charge_sig[entry.xtal4apd_4]*calibC[3])
+            histos["h_LRvsY"].Fill(entry.Y[0],ch_LR)
+            histos["h_LRvsY_calib"].Fill(entry.Y[0],ch_LR_calib)
+
+            histos["h_LRvsX"].Fill(entry.X[0],ch_LR)
+            histos["h_LRvsX_calib"].Fill(entry.X[0],ch_LR_calib)
+
+        if (ROOT.TMath.Abs(entry.X[0])>1.5 or ROOT.TMath.Abs(entry.X[1])>1.5 or ROOT.TMath.Abs(entry.Y[0])>1.5 or ROOT.TMath.Abs(entry.Y[1])>1.5):
             continue
         if (ROOT.TMath.Abs(entry.X[0]-entry.X[1])>1.5 or ROOT.TMath.Abs(entry.Y[0]-entry.Y[1])>1.5):
             continue
-        if(entry.charge_sig[entry.xtal11]<histos["h_xtal11_ch"].GetXaxis().GetXmin()+0.10*histos["h_xtal11_ch"].GetXaxis().GetXmin()): #hadron cleaning
-            continue
-        if(ene==200 and entry.charge_sig[entry.xtal11]<67000):
-            continue; #hadron contamination at 200 gev?or not containment?
+        if isXtal11:
+            if(entry.charge_sig[entry.xtal11]<histos["h_xtal11_ch"].GetXaxis().GetXmin()+0.10*histos["h_xtal11_ch"].GetXaxis().GetXmin()): #hadron cleaning
+                continue
+        if not isXtal11:
+            if(ene==200  and entry.charge_sig[entry.xtal6]+entry.charge_sig[entry.xtal2]+entry.charge_sig[entry.xtal15]+entry.charge_sig[entry.xtal11]<17000):
+                continue; #hadron contamination at 200 gev?
+ 
+            if(ene==200  and entry.amp_max[entry.xtal6]>3500): #saturation
+                continue
+           
+#        if(entry.charge_sig[entry.xtal4apd_1]*0.95<13000 or entry.charge_sig[entry.xtal4apd_2]*0.93<13000 or entry.charge_sig[entry.xtal4apd_3]*1.17<13000 or entry.charge_sig[entry.xtal4apd_4]*0.98<13000):
+#            continue; #hadron contamination at 200 gev?or not containment?
+
 
         if singleChannel != 1:
             matrixEnXtal11=0
@@ -246,10 +301,16 @@ def main():
             histos["h_matrix_xtal11_ampl"].Fill(matrixEnXtal11_ampl)
             histos["h_matrix_xtal11_ampl_fit"].Fill(matrixEnXtal11_fit)
             histos["h_matrix_xtal11_ampl_fit_calib"].Fill(matrixEnXtal11_calib_fit)
-            
-        histos["h_xtal11_ch"].Fill(entry.charge_sig[entry.xtal11])
-        histos["h_xtal11_ampl_fit"].Fill(entry.fit_ampl[entry.xtal11])
-        histos["h_xtal11_ampl"].Fill(entry.amp_max[entry.xtal11])
+        
+        if isXtal11:
+            histos["h_xtal11_ch"].Fill(entry.charge_sig[entry.xtal11])
+            histos["h_xtal11_ampl_fit"].Fill(entry.fit_ampl[entry.xtal11])
+            histos["h_xtal11_ampl"].Fill(entry.amp_max[entry.xtal11])
+        else:
+            histos["h_xtal11_ch"].Fill(entry.charge_sig[entry.xtal4apd_1]+entry.charge_sig[entry.xtal4apd_2]+entry.charge_sig[entry.xtal4apd_3]+entry.charge_sig[entry.xtal4apd_4])
+            histos["h_xtal11_ampl_fit"].Fill(entry.fit_ampl[entry.xtal4apd_1]+entry.fit_ampl[entry.xtal4apd_2]+entry.fit_ampl[entry.xtal4apd_3]+entry.fit_ampl[entry.xtal4apd_4])
+            histos["h_xtal11_ampl"].Fill(entry.amp_max[entry.xtal4apd_1]+entry.amp_max[entry.xtal4apd_2]+entry.amp_max[entry.xtal4apd_3]+entry.amp_max[entry.xtal4apd_4])
+       
 
 
 #----loop over entries of FFT-----
