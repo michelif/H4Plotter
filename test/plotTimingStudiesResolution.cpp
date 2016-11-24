@@ -41,6 +41,7 @@ int main( int argc, char* argv[] ) {
   TGraphErrors* resVsEnergy_MCP = new TGraphErrors(0);
   TGraphErrors* resVsEnergy_APD2_MCP = new TGraphErrors(0);
   TGraphErrors* resVsEnergy_APD = new TGraphErrors(0);
+  TGraphErrors* resVsEnergy_APD1andAPD2 = new TGraphErrors(0);
 
 
   for (int i=0;i<runs.size();++i){
@@ -62,7 +63,7 @@ int main( int argc, char* argv[] ) {
     TVectorD* resValue_time=(TVectorD*)file->Get("timingResolution_time");
     TVectorD* resValueErr_time=(TVectorD*)file->Get("timingResolutionError_time");
 
-    std::cout<<i<<" "<<(*resValue)[0]<<" "<<(*resValue)[2]<<" "<<(*resValueErr)[0]<<" "<<energies[i]<<std::endl;
+    std::cout<<i<<" "<<(*resValue)[0]<<" "<<(*resValue)[3]<<" "<<(*resValueErr)[0]<<" "<<energies[i]<<std::endl;
     
     resVsEnergy_MCP->SetPoint( i, energies[i], (*resValue)[0]*1000);
     resVsEnergy_MCP->SetPointError( i, 0,(*resValueErr)[0]*1000);
@@ -72,6 +73,11 @@ int main( int argc, char* argv[] ) {
 
     resVsEnergy_APD->SetPoint( i, energies[i], (*resValue)[2]*1000);
     resVsEnergy_APD->SetPointError( i, 0,(*resValueErr)[2]*1000);
+
+    resVsEnergy_APD1andAPD2->SetPoint( i, energies[i], (*resValue)[3]*1000);
+    resVsEnergy_APD1andAPD2->SetPointError( i, 0,(*resValueErr)[3]*1000);
+
+
   }
 
 
@@ -163,8 +169,30 @@ int main( int argc, char* argv[] ) {
   f_APD->Draw("L same");
 
 
+  //APD1 and APD2 average
+  TF1* f_APD1andAPD2= new TF1("fun_APD1andAPD2","sqrt([0]*[0]/(x*x)+[1]*[1])",(resVsEnergy_APD1andAPD2->GetX())[0]-10,(resVsEnergy_APD1andAPD2->GetX())[resVsEnergy_APD1andAPD2->GetN()-1] +10);
 
-  TLegend* leg_neat = new TLegend(0.5, 0.92-0.06*5 , 0.75, 0.92);
+  resVsEnergy_APD1andAPD2->SetMarkerStyle(20);
+  resVsEnergy_APD1andAPD2->SetMarkerSize(1.6);
+  resVsEnergy_APD1andAPD2->SetMarkerColor(kGreen+3);
+
+  resVsEnergy_APD1andAPD2->Draw("p same");
+
+
+  f_APD1andAPD2->SetParameter(0, 0);
+  f_APD1andAPD2->SetParameter(1, 10);
+  f_APD1andAPD2->SetParameter(2, 50);
+  
+  resVsEnergy_APD1andAPD2->Fit("fun_APD1andAPD2","RNE");
+
+
+  f_APD1andAPD2->SetLineWidth(1.);
+  f_APD1andAPD2->SetLineColor(kGreen+3);
+  f_APD1andAPD2->Draw("L same");
+
+
+
+  TLegend* leg_neat = new TLegend(0.4, 0.92-0.06*7 , 0.75, 0.92);
   leg_neat->SetTextSize(0.038);
   std::string ene="Electron Beam";
   leg_neat->AddEntry(resVsEnergy_MCP,"APD1 vs MCP","p");
@@ -176,6 +204,9 @@ int main( int argc, char* argv[] ) {
   leg_neat->AddEntry(resVsEnergy_APD,"APD1 vs APD2","p");
   leg_neat->AddEntry((TObject*)0 ,Form("N =  %2.0f #pm %2.0f",f_APD->GetParameter(0),f_APD->GetParError(0) ),"");
   leg_neat->AddEntry( (TObject*)0 ,Form("C =  %1.0f  #pm %1.0f",(f_APD->GetParameter(1)) ,f_APD->GetParError(1) ),"");
+  leg_neat->AddEntry(resVsEnergy_APD1andAPD2,"APD average vs MCP","p");
+  leg_neat->AddEntry((TObject*)0 ,Form("N =  %2.0f #pm %2.0f",f_APD1andAPD2->GetParameter(0),f_APD1andAPD2->GetParError(0) ),"");
+  leg_neat->AddEntry( (TObject*)0 ,Form("C =  %1.0f  #pm %1.0f",(f_APD1andAPD2->GetParameter(1)) ,f_APD1andAPD2->GetParError(1) ),"");
   leg_neat->SetFillColor(0);
   leg_neat->Draw("same");
 
