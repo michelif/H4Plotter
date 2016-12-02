@@ -19,12 +19,23 @@ vfloat = std.vector(float)
 
 
 #----function to book histos
-def bookHistos(histos):
-    histos["h_res_APD1"]=ROOT.TH1F("h_res_APD1","h_res_APD1",150,3.5,5.);
-    histos["h_res_APD2"]=ROOT.TH1F("h_res_APD2","h_res_APD2",150,3.5,5);
-    histos["h_res_APD1andAPD2"]=ROOT.TH1F("h_res_APD1andAPD2","h_res_APD1andAPD2",150,3.5,5);
-    histos["h_res_APD1vsAPD2"]=ROOT.TH1F("h_res_APD1vsAPD2","h_res_APD1vsAPD2",150,-0.5,1.5);
-    
+def bookHistos(histos,run):
+    histos["h_normalized_amp_APD1"]=ROOT.TH1F("h_normalized_amp_APD1","h_normalized_amp_APD1",500,0,250);
+    histos["h_normalized_amp_APD2"]=ROOT.TH1F("h_normalized_amp_APD2","h_normalized_amp_APD2",500,0,250);
+    histos["h_normalized_amp_APD1andAPD2"]=ROOT.TH1F("h_normalized_amp_APD1andAPD2","h_normalized_amp_APD1andAPD2",1200,0,600);
+    histos["h_normalized_amp_APD1vsAPD2"]=ROOT.TH1F("h_normalized_amp_APD1vsAPD2","h_normalized_amp_APD1vsAPD2",500,0,250);
+    if(run != 5789):
+        histos["h_res_APD1"]=ROOT.TH1F("h_res_APD1","h_res_APD1",150,3.5,5.);
+        histos["h_res_APD2"]=ROOT.TH1F("h_res_APD2","h_res_APD2",150,3.5,5);
+        histos["h_res_APD1andAPD2"]=ROOT.TH1F("h_res_APD1andAPD2","h_res_APD1andAPD2",150,3.5,5);
+        histos["h_res_APD1vsAPD2"]=ROOT.TH1F("h_res_APD1vsAPD2","h_res_APD1vsAPD2",150,-0.5,1.5);
+    else:
+        histos["h_res_APD1"]=ROOT.TH1F("h_res_APD1","h_res_APD1",150,3.0,5.5);
+        histos["h_res_APD2"]=ROOT.TH1F("h_res_APD2","h_res_APD2",150,3.0,5.5);
+        histos["h_res_APD1andAPD2"]=ROOT.TH1F("h_res_APD1andAPD2","h_res_APD1andAPD2",150,3.0,5.5);
+        histos["h_res_APD1vsAPD2"]=ROOT.TH1F("h_res_APD1vsAPD2","h_res_APD1vsAPD2",150,-1.0,2.0);
+
+
 #    histos["h_res_time_APD1"]=ROOT.TH1F("h_res_time_APD1","h_res_time_APD1",100,4.,5.);
 #    histos["h_res_time_APD2"]=ROOT.TH1F("h_res_time_APD2","h_res_time_APD2",100,3.5,4.5);
 #    histos["h_res_time_APD1vsAPD2"]=ROOT.TH1F("h_res_time_APD1vsAPD2","h_res_time_APD1vsAPD2",100,0,1.);
@@ -68,7 +79,7 @@ def main():
     outfile=ROOT.TFile("plots/plotsTiming_"+prefix+"_"+str(run)+".root","recreate")
 #----histo definition---- 
     histos={}
-    bookHistos(histos)
+    bookHistos(histos,run)
 
 #----loop over entries-----
     for entry in tree:
@@ -98,6 +109,15 @@ def main():
         histos["h_res_APD2"].Fill(entry.fit_time[entry.APD2]-entry.time[entry.MCP1])
         histos["h_res_APD1vsAPD2"].Fill(entry.fit_time[entry.APD1]-entry.fit_time[entry.APD2])
         histos["h_res_APD1andAPD2"].Fill((entry.fit_time[entry.APD2]+entry.fit_time[entry.APD1])/2.-entry.time[entry.MCP1])
+        #fill the normalized amplitudes
+        amp1=entry.amp_max[entry.APD1]/entry.b_rms[entry.APD1]
+        amp2=entry.amp_max[entry.APD2]/entry.b_rms[entry.APD2]
+        histos["h_normalized_amp_APD1"].Fill(amp1)
+        histos["h_normalized_amp_APD2"].Fill(amp2)
+        eff_ampl_diff=amp1*amp2/(math.sqrt(amp1*amp1+amp2*amp2))
+
+        histos["h_normalized_amp_APD1vsAPD2"].Fill(eff_ampl_diff)
+        histos["h_normalized_amp_APD1andAPD2"].Fill(2*eff_ampl_diff)
 
 #        histos["h_res_time_APD1"].Fill(entry.time[entry.APD1]-entry.time[entry.MCP1])
 #        histos["h_res_time_APD2"].Fill(entry.time[entry.APD2]-entry.time[entry.MCP1])
@@ -108,13 +128,28 @@ def main():
     f2=ROOT.TF1("f2","gaus")
     f3=ROOT.TF1("f3","gaus")
     f4=ROOT.TF1("f4","gaus")
+    f5=ROOT.TF1("f5","gaus")
+    f6=ROOT.TF1("f6","gaus")
+    f7=ROOT.TF1("f7","gaus")
+    f8=ROOT.TF1("f8","gaus")
+
     histos["h_res_APD1"].Fit("f1")
     histos["h_res_APD2"].Fit("f2")
     histos["h_res_APD1vsAPD2"].Fit("f3")
     histos["h_res_APD1andAPD2"].Fit("f4")
 
+    histos["h_normalized_amp_APD1"].Fit("f5")
+    histos["h_normalized_amp_APD2"].Fit("f6")
+    histos["h_normalized_amp_APD1vsAPD2"].Fit("f7")
+    histos["h_normalized_amp_APD1andAPD2"].Fit("f8")
+
+
     res = ROOT.TVectorD(4)
     resErr = ROOT.TVectorD(4)
+
+    amp = ROOT.TVectorD(4)
+    ampErr = ROOT.TVectorD(4)
+
 
     res[0] = math.sqrt(f1.GetParameter(2)*f1.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
     res[1] = math.sqrt(f2.GetParameter(2)*f2.GetParameter(2)-0.020*0.020) #subtracting mcp resolution
@@ -126,9 +161,14 @@ def main():
     resErr[2] = math.sqrt(f3.GetParError(2)*f3.GetParError(2)/2)
     resErr[3] = f4.GetParError(2)
 
+    amp[0] = f5.GetParameter(1);
+    amp[1] = f6.GetParameter(1);
+    amp[2] = f7.GetParameter(1);
+    amp[3] = f8.GetParameter(1);
+
     res.Write("timingResolution")
     resErr.Write("timingResolutionError")
-
+    amp.Write("effAmplitude")
 
     #not using template fit
 #    f1_time=ROOT.TF1("f1_time","gaus")
