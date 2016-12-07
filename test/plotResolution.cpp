@@ -84,7 +84,7 @@ int main( int argc, char* argv[] ) {
     TVectorD* resValue=(TVectorD*)file->Get("resolution");
     TVectorD* resValueErr=(TVectorD*)file->Get("resolutionErr");
 
-    std::cout<<i<<" "<<(*resValue)[0]<<" "<<(*resValueErr)[0]<<std::endl;
+    std::cout<<i<<" "<<(*resValue)[0]<<" "<<(*resValueErr)[0]<<" "<<energies[i]<<std::endl;
 
     resVsEnergy_xtal->SetPoint( i, energies[i], (*resValue)[0]);
     resVsEnergy_xtal->SetPointError( i, 0,(*resValueErr)[0]);
@@ -94,14 +94,15 @@ int main( int argc, char* argv[] ) {
 
     if(addMC) {
       
+
       TString energy;
-      energy.Form("%d",energies[i]);
+      energy.Form("%d",(int)energies[i]);
       energy+="GeV";
-      TFile* file_MC = TFile::Open("plots/resolution_Ideal2016_"+energy+".root");
+      TFile* file_MC = TFile::Open("plots/resolution_Ideal2016_smeared_"+energy+".root");
 
 
-      TVectorD* resValue_MC=(TVectorD*)file->Get("resolution");
-      TVectorD* resValueErr_MC=(TVectorD*)file->Get("resolutionErr");
+      TVectorD* resValue_MC=(TVectorD*)file_MC->Get("resolution");
+      TVectorD* resValueErr_MC=(TVectorD*)file_MC->Get("resolutionErr");
       
       resVsEnergy_xtal_MC->SetPoint( i, energies[i], (*resValue_MC)[0]);
       resVsEnergy_xtal_MC->SetPointError( i, 0,(*resValueErr_MC)[0]);
@@ -137,7 +138,7 @@ int main( int argc, char* argv[] ) {
   if(addMC){
     resVsEnergy_xtal_MC->SetMarkerStyle(20);
     resVsEnergy_xtal_MC->SetMarkerSize(1.6);
-    resVsEnergy_xtal_MC->SetMarkerColor(kBlue+4);
+    resVsEnergy_xtal_MC->SetMarkerColor(kRed);
     
     resVsEnergy_xtal_MC->Draw("p same");
   }
@@ -164,7 +165,10 @@ int main( int argc, char* argv[] ) {
   leg_neat->SetTextSize(0.038);
   std::string ene="Electron Beam";
   leg_neat->AddEntry(resVsEnergy_xtal,"Data CeF_{3}","p");
-  //      leg_neat->AddEntry((TObject*)0 ,Form("S =  %.2f\n%s #pm %.2f / #sqrt{E [GeV]}",f_ene->GetParameter(0),"%",f_ene->GetParError(0) ),"");                                                                                           
+  //      leg_neat->AddEntry((TObject*)0 ,Form("S =  %.2f\n%s #pm %.2f / #sqrt{E [GeV]}",f_ene->GetParameter(0),"%",f_ene->GetParError(0) ),"");                                                                                       
+
+  if(addMC) leg_neat->AddEntry(resVsEnergy_xtal_MC,"Simulation","p");
+    
   leg_neat->AddEntry((TObject*)0 ,Form("S =  %.2f\n%s #pm %.2f",f_ene->GetParameter(0),"%",f_ene->GetParError(0) ),"");
   leg_neat->AddEntry( (TObject*)0 ,Form("C =  %.2f\n%s  #pm %.2f",(f_ene->GetParameter(1)) ,"%",f_ene->GetParError(1) ),"");
   leg_neat->SetFillColor(0);
@@ -197,7 +201,7 @@ int main( int argc, char* argv[] ) {
   if(addMC){
     resVsEnergy_matrix_MC->SetMarkerStyle(20);
     resVsEnergy_matrix_MC->SetMarkerSize(1.6);
-    resVsEnergy_matrix_MC->SetMarkerColor(kBlue+4);
+    resVsEnergy_matrix_MC->SetMarkerColor(kRed);
     
     resVsEnergy_matrix_MC->Draw("p same");
   }
@@ -222,7 +226,10 @@ int main( int argc, char* argv[] ) {
   TLegend* leg_neat_2 = new TLegend(0.4, 0.92-0.06*5 , 0.8, 0.92);
   leg_neat_2->SetTextSize(0.038);
   leg_neat_2->AddEntry(resVsEnergy_matrix,"Data CeF_{3}","p");
-  //      leg_neat_2->AddEntry((TObject*)0 ,Form("S =  %.2f\n%s #pm %.2f / #sqrt{E [GeV]}",f_ene_2->GetParameter(0),"%",f_ene_2->GetParError(0) ),"");                                                                                           
+  //      leg_neat_2->AddEntry((TObject*)0 ,Form("S =  %.2f\n%s #pm %.2f / #sqrt{E [GeV]}",f_ene_2->GetParameter(0),"%",f_ene_2->GetParError(0) ),"");                                                                                 
+
+  if(addMC) leg_neat_2->AddEntry(resVsEnergy_matrix_MC,"Simulation","p");
+          
   leg_neat_2->AddEntry((TObject*)0 ,Form("S =  %.2f\n%s #pm %.2f",f_ene_2->GetParameter(0),"%",f_ene_2->GetParError(0) ),"");
   leg_neat_2->AddEntry( (TObject*)0 ,Form("C =  %.2f\n%s  #pm %.2f",(f_ene_2->GetParameter(1)) ,"%",f_ene_2->GetParError(1) ),"");
   leg_neat_2->SetFillColor(0);

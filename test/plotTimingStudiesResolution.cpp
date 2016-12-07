@@ -19,9 +19,16 @@ int main( int argc, char* argv[] ) {
   gROOT->ProcessLine(".x ~/rootlogon.C");
 
   if( argc<1 ) {
-    std::cout << "Usage: ./bin/plotResolution [matrix] ([addMC])"<<std::endl;
+    std::cout << "Usage: ./bin/plotTimingStudiesResolution ([suffix])"<<std::endl;
     std::cout << "ERROR. You need to specify the matrix you want to process" << std::endl;
     exit(1);
+  }
+
+  std::string suffix = "_";
+  if(argc>1){
+    std::string suffix_str(argv[1]);
+    suffix += suffix_str;
+    suffix += "_";
   }
   
   std::vector<int> runs;
@@ -48,7 +55,7 @@ int main( int argc, char* argv[] ) {
     TString run;
     run.Form("%d",runs[i]);
 
-    TFile* file = TFile::Open("plots/plotsTiming_TimingStudies_"+run+".root");
+    TFile* file = TFile::Open("plots/plotsTiming_TimingStudies"+suffix+run+".root");
 
     if( file==0 ) {
       std::cout << "ERROR! Din't find file for run" << runs[i] << std::endl;
@@ -60,23 +67,27 @@ int main( int argc, char* argv[] ) {
     TVectorD* resValue=(TVectorD*)file->Get("timingResolution");
     TVectorD* resValueErr=(TVectorD*)file->Get("timingResolutionError");
 
-    TVectorD* resValue_time=(TVectorD*)file->Get("timingResolution_time");
-    TVectorD* resValueErr_time=(TVectorD*)file->Get("timingResolutionError_time");
+    TVectorD* ampValue=(TVectorD*)file->Get("effAmplitude");
 
     std::cout<<i<<" "<<(*resValue)[0]<<" "<<(*resValue)[3]<<" "<<(*resValueErr)[0]<<" "<<energies[i]<<std::endl;
     
-    resVsEnergy_MCP->SetPoint( i, energies[i], (*resValue)[0]*1000);
+    //    resVsEnergy_MCP->SetPoint( i, energies[i], (*resValue)[0]*1000);
+   resVsEnergy_MCP->SetPoint( i, (*ampValue)[0], (*resValue)[0]*1000);
     resVsEnergy_MCP->SetPointError( i, 0,(*resValueErr)[0]*1000);
 
-    resVsEnergy_APD2_MCP->SetPoint( i, energies[i], (*resValue)[1]*1000);
+    //    resVsEnergy_APD2_MCP->SetPoint( i, energies[i], (*resValue)[1]*1000);
+    resVsEnergy_APD2_MCP->SetPoint( i, (*ampValue)[1], (*resValue)[1]*1000);
     resVsEnergy_APD2_MCP->SetPointError( i, 0,(*resValueErr)[1]*1000);
 
-    resVsEnergy_APD->SetPoint( i, energies[i], (*resValue)[2]*1000);
+    //    resVsEnergy_APD->SetPoint( i, energies[i], (*resValue)[2]*1000);
+    resVsEnergy_APD->SetPoint( i, (*ampValue)[2], (*resValue)[2]*1000);
     resVsEnergy_APD->SetPointError( i, 0,(*resValueErr)[2]*1000);
 
-    resVsEnergy_APD1andAPD2->SetPoint( i, energies[i], (*resValue)[3]*1000);
+    //    resVsEnergy_APD1andAPD2->SetPoint( i, energies[i], (*resValue)[3]*1000);
+    resVsEnergy_APD1andAPD2->SetPoint( i, (*ampValue)[3], (*resValue)[3]*1000);
     resVsEnergy_APD1andAPD2->SetPointError( i, 0,(*resValueErr)[3]*1000);
 
+    std::cout<<"done with:"<<energies[i]<<std::endl;
 
   }
 
@@ -84,7 +95,7 @@ int main( int argc, char* argv[] ) {
   TCanvas* c1 = new TCanvas();
   //  TH2D* h2_axes_3 = new TH2D( "axes_1", "", 100, -0.0, 250. , 110, 0., 1.1*((resVsEnergy_xtal->GetY())[0]+(resVsEnergy_xtal->GetErrorY(0))));
   TH2D* h2_axes_3 = new TH2D( "axes_1", "", 100, -0.0, 250. , 110, 0., 650.);
-  h2_axes_3->SetXTitle("Beam Energy [GeV]");
+  h2_axes_3->SetXTitle("A/#sigma");
   h2_axes_3->GetYaxis()->SetTitleOffset(1.3);
   h2_axes_3->SetYTitle("Timing Resolution [ps]");
 
@@ -210,9 +221,10 @@ int main( int argc, char* argv[] ) {
   leg_neat->SetFillColor(0);
   leg_neat->Draw("same");
 
+  std::string nameFile = "plots/reso"+suffix+"TimingStudies";
 
-  c1->SaveAs("plots/reso_TimingStudies.png");
-  c1->SaveAs("plots/reso_TimingStudies.pdf");
+  c1->SaveAs((nameFile+".png").c_str());
+  c1->SaveAs((nameFile+".pdf").c_str());
 
 
 }
