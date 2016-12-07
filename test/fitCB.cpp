@@ -33,7 +33,7 @@ float getRatioError( float num, float denom, float numErr, float denomErr ) {
 
 std::pair<float,float> fitCB(TH1F* histo, TString runNumberString, float noiseTerm, std::string prefix){
   
-
+  //    histo->Rebin(2);
 
   double peakpos = histo->GetBinCenter(histo->GetMaximumBin());
   double sigma = histo->GetRMS();
@@ -175,18 +175,27 @@ std::pair<float,float> fitGaus(TH1F* histo, TString runNumberString, float noise
 
 std::pair<float,float> fitGausROOT(TH1F* histo, TString runNumberString, float noiseTerm, std::string prefix){
   
-  //  histo->Rebin(2);
 
+  std::cout<<histo->GetName()<<std::endl;
 
-  double peakpos = histo->GetBinCenter(histo->GetMaximumBin());
+   double peakpos = histo->GetBinCenter(histo->GetMaximumBin());
+  //double peakpos = histo->GetMean();
   double sigma = histo->GetRMS();
+
+  if(runNumberString=="4694" || runNumberString=="4682" || runNumberString=="4669"  || runNumberString=="4772"){
+    //    peakpos=histo->GetMean();
+    sigma=sigma/2.;
+    //    std::cout<<"daje"<<std::endl;
+  }
 
   double fitmin;
   double fitmax;
 
 
-  fitmin = peakpos-2*sigma;
-  fitmax = peakpos+2*sigma;
+  fitmin = peakpos-1.5*sigma;
+  fitmax = peakpos+1.5*sigma;
+
+
 
   TF1 f1("f1","gaus",fitmin,fitmax);
   f1.SetParameter(0,peakpos);
@@ -194,6 +203,7 @@ std::pair<float,float> fitGausROOT(TH1F* histo, TString runNumberString, float n
   f1.SetLineColor(kBlue);
   f1.SetLineWidth(2);
   histo->GetXaxis()->SetRangeUser(fitmin,fitmax);
+  std::cout<<fitmin<<" "<<fitmax<<" "<<peakpos<<" "<<sigma<<"historange: "<<histo->GetXaxis()->GetBinLowEdge(histo->GetXaxis()->GetFirst())<<" "<<histo->GetBinCenter(histo->GetNbinsX())<<std::endl;
   histo->Fit("f1","","",fitmin,fitmax);
   histo->SetStats(kFALSE);
   //  RooPlot* frame;
@@ -248,6 +258,7 @@ int main( int argc, char* argv[] ) {
 
   std::string runName = "";
   std::string prefix = "";
+  std::string xtal = "xtal11";
 
   if( argc>1 ) {
     std::string runName_str(argv[1]);
@@ -255,7 +266,13 @@ int main( int argc, char* argv[] ) {
     if( argc>2 ) {
     std::string prefix_str(argv[2]);
     prefix = prefix_str;
+    if( argc>3 ) {
+      std::string xtal_str(argv[3]);
+      xtal = xtal_str;
     }
+
+    }
+
   }
   TString runNumberString(runName);
 
@@ -307,7 +324,12 @@ int main( int argc, char* argv[] ) {
   fitCB(histo_maxAmpl_xtal11_fft, runNumberString,0,prefix);
   fitCB(histo_maxAmpl_xtal11_fit_fft, runNumberString,0,prefix);
 
-  std::pair<float,float> reso_xtal=  fitCB(histo_xtal11, runNumberString,(*sigmaPedestal)[10],prefix);
+  float  noiseXtal11_newReco=77;
+  if(xtal=="xtal4apd"){
+   noiseXtal11_newReco=6.87321e+01;
+  }
+  // std::pair<float,float> reso_xtal=  fitCB(histo_xtal11, runNumberString,(*sigmaPedestal)[10],prefix);
+ std::pair<float,float> reso_xtal=  fitCB(histo_xtal11, runNumberString,noiseXtal11_newReco,prefix);
   
   resolution [0] = reso_xtal.first;
   resolutionErr [0] = reso_xtal.second;
@@ -329,27 +351,41 @@ int main( int argc, char* argv[] ) {
 
 
   noiseMatrix_xtal11=sqrt(noiseMatrix_xtal11);
-  noiseMatrix_xtal11=8.03337e+02;
+  //    noiseMatrix_xtal11=8.03337e+02;
+  noiseMatrix_xtal11=4.97181e+02;
+  if(xtal=="xtal4apd"){
+    //    noiseMatrix_xtal11=5.00847e+02 ;
+    //with intercalib
+    noiseMatrix_xtal11=7.66836e+02;
+    std::cout<<"########################################## noise!"<<std::endl;
+  }
+
+
+
 
   TH1F* cloneHisto=(TH1F*)histo_matrix_xtal11->Clone();
   fitGausROOT(histo_matrix_xtal11, runNumberString,0,prefix);
   std::pair<float,float> reso_matrix  =  fitGausROOT(cloneHisto, runNumberString,noiseMatrix_xtal11,prefix);
-  fitGausROOT(histo_matrix_xtal11_FFT, runNumberString,0,prefix);
+  //  std::pair<float,float> reso_matrix  =  fitGausROOT(cloneHisto, runNumberString,0.001,prefix);
+  //  std::pair<float,float> reso_matrix  =  fitCB(cloneHisto, runNumberString,noiseMatrix_xtal11,prefix);
+  //  fitGausROOT(histo_matrix_xtal11_FFT, runNumberString,0,prefix);
 
   fitGausROOT(histo_matrix_uncalib_xtal11, runNumberString,0,prefix);
-  fitGausROOT(histo_matrix_uncalib_xtal11_FFT, runNumberString,0,prefix);
+  //  fitGausROOT(histo_matrix_uncalib_xtal11_FFT, runNumberString,0,prefix);
 
 
 
   //  fitGaus(histo_matrix_xtal11_FFT, runNumberString,0);
 //  std::pair<float,float> reso_matrix  =  fitGaus(histo_matrix_xtal11, runNumberString,noiseMatrix_xtal11);
 //
-//  resolution [1] = reso_matrix.first;
-//  resolutionErr [1] = reso_matrix.second;
-//
-//
-//  resolution.Write("resolution");
-//  resolutionErr.Write("resolutionErr");
+
+
+  resolution [1] = reso_matrix.first;
+  resolutionErr [1] = reso_matrix.second;
+
+
+  resolution.Write("resolution");
+  resolutionErr.Write("resolutionErr");
 
   outFile->Write();
   outFile->Close();
